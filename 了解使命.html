@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>了解使命 · 归家 Heritage Homeward</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+        :root {
+            --bg-deep: #0b0d0f;
+            --bg-card: #111317;
+            --bg-elevated: #16191e;
+            --gold: #d4af37;
+            --gold-dim: #b8963c;
+            --gold-pale: #f7e7c8;
+            --text-primary: #e5e3db;
+            --text-secondary: #cfc0a9;
+            --text-muted: #9a9484;
+            --text-dim: #6b6560;
+            --border-subtle: #2a2a2a;
+            --border-mid: #3a3832;
+            --green-accent: #4ade80;
+            --red-accent: #f87171;
+            --amber-accent: #fbbf24;
+            --blue-accent: #60a5fa;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+            scroll-behavior: smooth;
+        }
+
+        html::-webkit-scrollbar {
+            display: none;
+        }
+
+        body {
+            font-family: 'Inter', 'Noto Serif SC', 'PingFang SC', 'Microsoft YaHei', serif;
+            background-color: var(--bg-deep);
+            color: var(--text-primary);
+            line-height: 1.7;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-y: scroll;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .serif {
+            font-family: 'Noto Serif SC', 'STSong', 'Songti SC', 'SimSun', serif;
+        }
+
+        /* ── 主容器 ── */
+        main {
+            flex: 1;
+            max-width: 880px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 5rem 1.5rem 3rem;
+        }
+
+        /* ── 页面头部 ── */
+        .page-header {
+            text-align: center;
+            margin-bottom: 3.5rem;
+            position: relative;
+        }
+
+        .page-header .icon-circle {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(212, 175, 55, 0.25) 0%, rgba(184, 150, 60, 0.06) 70%);
+            border: 1.5px solid rgba(212, 175, 55, 0.35);
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+            color: var(--gold);
+        }
+
+        .page-header h1 {
+            font-family: 'Noto Serif SC', serif;
+            font-size: clamp(2.2rem, 5vw, 3.2rem);
+            font-weight: 700;
+            color: var(--gold-pale);
+            letter-spacing: 2px;
+            margin-bottom: 0.6rem;
+            line-height: 1.3;
+        }
+
+        .page-header h1 .accent {
+            color: var(--gold);
+            font-style: italic;
+            display: inline-block;
+        }
+
+        .page-header .tagline {
+            font-size: 1.05rem;
+            color: var(--text-muted);
+            font-weight: 300;
+            letter-spacing: 0.5px;
+            max-width: 520px;
+            margin: 0 auto;
+        }
+
+        .page-header::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 2px;
+            background: var(--gold-dim);
+            margin: 1.8rem auto 0;
+            border-radius: 1px;
+            opacity: 0.7;
+        }
+
+        /* ── 区块标题 ── */
+        .section-title {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 1.55rem;
+            font-weight: 600;
+            color: var(--gold-pale);
+            letter-spacing: 1px;
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .section-title i {
+            color: var(--gold-dim);
+            font-size: 1.25rem;
+            width: 1.6rem;
+            text-align: center;
+        }
+
+        .section-title .line-accent {
+            flex: 1;
+            height: 1px;
+            background: var(--border-mid);
+            min-width: 30px;
+            align-self: center;
+            margin-left: 0.5rem;
+        }
+
+        /* ── 区块 ── */
+        section {
+            margin-bottom: 3.5rem;
+            padding-bottom: 0;
+        }
+
+        section+section {
+            padding-top: 0.5rem;
+        }
+
+        /* ── 使命宣言卡片 ── */
+        .mission-statement {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 1rem;
+            padding: 2rem 2.2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mission-statement::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, var(--gold-dim) 0%, rgba(184, 150, 60, 0.15) 100%);
+            border-radius: 4px 0 0 4px;
+        }
+
+        .mission-statement .quote-text {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 1.3rem;
+            font-weight: 400;
+            color: var(--text-secondary);
+            line-height: 1.8;
+            letter-spacing: 0.4px;
+            margin-bottom: 1rem;
+        }
+
+        .mission-statement .quote-text em {
+            font-style: italic;
+            color: var(--gold);
+        }
+
+        .mission-statement .attribution {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            letter-spacing: 0.5px;
+            text-align: right;
+        }
+
+        /* ── 数据网格 ── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-top: 0;
+        }
+
+        @media (max-width: 600px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.75rem;
+            }
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 0.85rem;
+            padding: 1.3rem 1rem;
+            text-align: center;
+            transition: border-color 0.25s, box-shadow 0.25s;
+        }
+
+        .stat-card:hover {
+            border-color: var(--gold-dim);
+            box-shadow: 0 0 20px rgba(184, 150, 60, 0.12);
+        }
+
+        .stat-card .stat-number {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 2.4rem;
+            font-weight: 700;
+            color: var(--gold);
+            letter-spacing: 1px;
+            line-height: 1;
+            margin-bottom: 0.4rem;
+        }
+
+        .stat-card .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 400;
+        }
+
+        /* ── 原则列表 ── */
+        .principles-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .principles-list li {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 0.75rem;
+            padding: 1.2rem 1.5rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            transition: border-color 0.25s;
+        }
+
+        .principles-list li:hover {
+            border-color: var(--border-mid);
+        }
+
+        .principles-list li .principle-icon {
+            flex-shrink: 0;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(212, 175, 55, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            color: var(--gold-dim);
+            margin-top: 2px;
+        }
+
+        .principles-list li .principle-content h4 {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+            letter-spacing: 0.3px;
+        }
+
+        .principles-list li .principle-content p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.55;
+            margin: 0;
+        }
+
+        /* ── 参与方式 ── */
+        .involvement-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+        }
+
+        .involvement-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 0.85rem;
+            padding: 1.5rem 1.3rem;
+            text-align: center;
+            transition: border-color 0.25s, box-shadow 0.25s;
+        }
+
+        .involvement-card:hover {
+            border-color: var(--gold-dim);
+            box-shadow: 0 0 18px rgba(184, 150, 60, 0.1);
+        }
+
+        .involvement-card .card-icon {
+            font-size: 1.6rem;
+            color: var(--gold-dim);
+            margin-bottom: 0.8rem;
+        }
+
+        .involvement-card h4 {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            margin-bottom: 0.4rem;
+            letter-spacing: 0.3px;
+        }
+
+        .involvement-card p {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        /* ── 高亮引用块 ── */
+        .highlight-quote {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-mid);
+            border-radius: 0.75rem;
+            padding: 1.6rem 2rem;
+            text-align: center;
+            font-family: 'Noto Serif SC', serif;
+            font-size: 1.15rem;
+            color: var(--text-secondary);
+            letter-spacing: 0.5px;
+            line-height: 1.7;
+            position: relative;
+        }
+
+        .highlight-quote::before {
+            content: '"';
+            position: absolute;
+            top: -0.6rem;
+            left: 1.2rem;
+            font-size: 3.5rem;
+            color: var(--gold-dim);
+            opacity: 0.35;
+            font-family: 'Noto Serif SC', serif;
+            line-height: 1;
+        }
+
+        .highlight-quote .highlight {
+            color: var(--gold);
+            font-weight: 600;
+        }
+
+        /* ── 许可信息条 ── */
+        .license-bar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.8rem 2rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 0.75rem;
+            padding: 1.2rem 1.6rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            justify-content: center;
+        }
+
+        .license-bar i {
+            color: var(--gold-dim);
+            margin-right: 0.3rem;
+        }
+
+        .license-bar a {
+            color: var(--gold-dim);
+            text-decoration: underline;
+            text-underline-offset: 3px;
+            transition: color 0.2s;
+        }
+
+        .license-bar a:hover {
+            color: var(--gold);
+        }
+
+        /* ── 页脚 ── */
+        footer {
+            border-top: 1px solid var(--border-subtle);
+            padding: 1.5rem 1.5rem;
+            text-align: center;
+            font-size: 0.78rem;
+            color: var(--text-dim);
+            letter-spacing: 0.3px;
+            max-width: 880px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        footer a {
+            color: var(--text-dim);
+            text-decoration: underline;
+            text-underline-offset: 3px;
+            transition: color 0.2s;
+        }
+
+        footer a:hover {
+            color: var(--gold-dim);
+        }
+
+        /* ── 分隔线 ── */
+        .divider {
+            border: none;
+            border-top: 1px solid var(--border-subtle);
+            margin: 2.5rem 0;
+            opacity: 0.6;
+        }
+
+        /* ── 响应式微调 ── */
+        @media (max-width: 480px) {
+            main {
+                padding: 3rem 1rem 2rem;
+            }
+
+            .mission-statement {
+                padding: 1.5rem 1.3rem;
+            }
+
+            .mission-statement .quote-text {
+                font-size: 1.1rem;
+            }
+
+            .principles-list li {
+                padding: 1rem 1.1rem;
+                gap: 0.7rem;
+            }
+
+            .highlight-quote {
+                padding: 1.3rem 1.2rem;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ═══════════ 主体内容 ═══════════ -->
+    <main>
+
+        <!-- 页面头部 -->
+        <header class="page-header" aria-labelledby="page-heading">
+            <div class="icon-circle" aria-hidden="true">
+                <i class="fas fa-scroll"></i>
+            </div>
+            <h1 id="page-heading" class="serif">
+                我们的<span class="accent">使命</span>
+            </h1>
+            <p class="tagline">
+                归家 · Heritage Homeward — 记录世界流失文物，以开放数据铭记文明伤痕，用事实连接过去与未来。
+            </p>
+        </header>
+
+        <!-- 核心使命宣言 -->
+        <section aria-labelledby="mission-heading">
+            <h2 id="mission-heading" class="section-title">
+                <i class="fas fa-bullseye" aria-hidden="true"></i> 核心使命<span class="line-accent"></span>
+            </h2>
+            <div class="mission-statement">
+                <p class="quote-text">
+                    <em>以开放数据铭记文明伤痕，用事实连接过去与未来。</em>
+                </p>
+                <p class="quote-text" style="font-size:1.05rem;margin-top:0.8rem;">
+                    我们致力于建设一个<strong>社区驱动的非营利知识库</strong>，系统性地记录、整理并公开世界范围内因战争、殖民掠夺、非法盗运等原因而流失的文物信息。我们相信，<em>透明的数据</em>是文化反思与正义回归的基石。
+                </p>
+                <p class="attribution">—— 归家 · Heritage Homeward 项目宣言</p>
+            </div>
+        </section>
+
+        <!-- 数据规模 -->
+        <section aria-labelledby="scale-heading">
+            <h2 id="scale-heading" class="section-title">
+                <i class="fas fa-database" aria-hidden="true"></i> 当前数据规模<span class="line-accent"></span>
+            </h2>
+            <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:1.2rem;">
+                截至最新统计，我们的开放数据库已收录以下规模的文物与事件记录。每一项数字背后，都是一段需要被铭记的历史。
+            </p>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">1,286</div>
+                    <div class="stat-label">已收录文物</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">3,402</div>
+                    <div class="stat-label">流转事件</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">879</div>
+                    <div class="stat-label">关联机构</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">47</div>
+                    <div class="stat-label">原属国家</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 核心原则 -->
+        <section aria-labelledby="principles-heading">
+            <h2 id="principles-heading" class="section-title">
+                <i class="fas fa-balance-scale" aria-hidden="true"></i> 我们坚守的原则<span class="line-accent"></span>
+            </h2>
+            <ul class="principles-list">
+                <li>
+                    <div class="principle-icon" aria-hidden="true">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="principle-content">
+                        <h4>基于事实，尊重多元记忆</h4>
+                        <p>
+                            所有数据均来自可追溯的公开文献、学术研究及文博机构记录。我们呈现多方视角，尊重不同文化对历史叙事的理解，不以单一立场裁定历史。
+                        </p>
+                    </div>
+                </li>
+                <li>
+                    <div class="principle-icon" aria-hidden="true">
+                        <i class="fas fa-lock-open"></i>
+                    </div>
+                    <div class="principle-content">
+                        <h4>完全开源，数据透明</h4>
+                        <p>
+                            项目代码与数据结构完全开源。任何人都可以查阅、审核我们的数据来源，提出修正，或基于我们的数据构建新的知识工具。透明是信任的前提。
+                        </p>
+                    </div>
+                </li>
+                <li>
+                    <div class="principle-icon" aria-hidden="true">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="principle-content">
+                        <h4>社区驱动，非营利运作</h4>
+                        <p>
+                            我们不代表任何政府或文博机构立场。项目由志愿者、学者、历史爱好者共同维护，所有贡献均遵循 CC BY-SA 4.0 许可协议发布，确保知识的公共属性。
+                        </p>
+                    </div>
+                </li>
+                <li>
+                    <div class="principle-icon" aria-hidden="true">
+                        <i class="fas fa-globe-asia"></i>
+                    </div>
+                    <div class="principle-content">
+                        <h4>连接过去与未来</h4>
+                        <p>
+                            我们不仅记录流失，也追踪归还。通过时间轴、地图可视化和文物条目，我们希望帮助公众理解文物流动的完整脉络，并为未来的文化对话提供事实基础。
+                        </p>
+                    </div>
+                </li>
+            </ul>
+        </section>
+
+        <!-- 你如何参与 -->
+        <section aria-labelledby="involvement-heading">
+            <h2 id="involvement-heading" class="section-title">
+                <i class="fas fa-hand-holding-heart" aria-hidden="true"></i> 你如何参与<span class="line-accent"></span>
+            </h2>
+            <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:1.2rem;">
+                无论你是文博学者、历史爱好者，还是关心文化血脉的普通人，都可以成为这条归家路上的一盏灯。
+            </p>
+            <div class="involvement-grid">
+                <div class="involvement-card">
+                    <div class="card-icon" aria-hidden="true">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <h4>贡献文献</h4>
+                    <p>提供学术论文、档案记录、新闻报道等来源，帮助我们完善文物条目的引用链。</p>
+                </div>
+                <div class="involvement-card">
+                    <div class="card-icon" aria-hidden="true">
+                        <i class="fas fa-plus-circle"></i>
+                    </div>
+                    <h4>提交文物条目</h4>
+                    <p>发现尚未收录的流失文物？提交详细信息，经社区审阅后即可加入公开数据库。</p>
+                </div>
+                <div class="involvement-card">
+                    <div class="card-icon" aria-hidden="true">
+                        <i class="fas fa-clipboard-check"></i>
+                    </div>
+                    <h4>审阅信息</h4>
+                    <p>协助核实数据准确性，标注存疑条目，确保知识库的严谨与可信。</p>
+                </div>
+                <div class="involvement-card">
+                    <div class="card-icon" aria-hidden="true">
+                        <i class="fas fa-share-alt"></i>
+                    </div>
+                    <h4>传播与倡导</h4>
+                    <p>分享我们的地图与故事，让更多人关注流失文物问题，推动公共讨论与文化反思。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 核心引述 -->
+        <div class="highlight-quote" aria-labelledby="quote-text">
+            <p id="quote-text">
+                <span class="highlight">你也是这条归家路上的一盏灯。</span><br>
+                每一份文献、每一次审阅、每一次分享，都在为文化记忆的复原与正义的追寻贡献力量。
+            </p>
+        </div>
+
+        <hr class="divider" aria-hidden="true">
+
+        <!-- 项目性质与许可 -->
+        <section aria-labelledby="nature-heading">
+            <h2 id="nature-heading" class="section-title">
+                <i class="fas fa-info-circle" aria-hidden="true"></i> 项目性质与法律声明<span class="line-accent"></span>
+            </h2>
+            <div class="license-bar">
+                <span>
+                    <i class="fas fa-building" aria-hidden="true"></i>
+                    本网站为<strong>社区驱动的非营利知识库</strong>，不代表任何政府或文博机构立场。
+                </span>
+                <span>
+                    <i class="fab fa-creative-commons" aria-hidden="true"></i>
+                    内容以 <strong>CC BY-SA 4.0</strong> 许可发布
+                </span>
+                <span>
+                    <i class="fas fa-gavel" aria-hidden="true"></i>
+                    <a href="#">法律声明</a>
+                </span>
+                <span>
+                    <i class="fas fa-envelope" aria-hidden="true"></i>
+                    <a href="#">联络我们</a>
+                </span>
+            </div>
+            <p style="color:var(--text-dim);font-size:0.78rem;text-align:center;margin-top:1rem;">
+                我们尊重所有文化与国家的历史叙述。本网站内容仅供教育与研究目的，不构成任何法律主张或政治声明。
+            </p>
+        </section>
+
+    </main>
+
+    <!-- ═══════════ 页脚 ═══════════ -->
+    <footer>
+        <p>
+            &copy; 归家 · Heritage Homeward &mdash; 记录世界流失文物 &nbsp;|&nbsp;
+            内容以 <a href="#">CC BY-SA 4.0</a> 许可发布 &nbsp;|&nbsp;
+            <a href="#">法律声明</a> &nbsp;|&nbsp;
+            <a href="#">联络我们</a>
+        </p>
+        <p style="margin-top:0.4rem;">
+            本网站为社区驱动的非营利知识库，不代表任何政府或文博机构立场。
+        </p>
+    </footer>
+
+</body>
+
+</html>

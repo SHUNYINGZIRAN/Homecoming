@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>开源数据 · 归家 Heritage Homeward</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+        :root {
+            --bg-deep: #0b0d0f;
+            --bg-stripe: #111317;
+            --bg-stripe-alt: #0f1114;
+            --gold: #d4af37;
+            --gold-dim: #b8963c;
+            --gold-pale: #f7e7c8;
+            --text-primary: #e5e3db;
+            --text-secondary: #cfc0a9;
+            --text-muted: #9a9484;
+            --text-dim: #6b6560;
+            --border-subtle: #2a2a2a;
+            --border-mid: #3a3832;
+            --green-accent: #4ade80;
+            --amber-accent: #fbbf24;
+            --red-accent: #f87171;
+            --blue-accent: #60a5fa;
+            --radius-sm: 0.5rem;
+            --radius-md: 0.75rem;
+            --radius-lg: 1rem;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        html::-webkit-scrollbar {
+            display: none;
+        }
+
+        body {
+            font-family: 'Inter', 'Noto Serif SC', 'PingFang SC', 'Microsoft YaHei', serif;
+            background-color: var(--bg-deep);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            letter-spacing: 0.3px;
+            font-weight: 400;
+        }
+
+        .serif {
+            font-family: 'Noto Serif SC', 'STSong', 'Songti SC', serif;
+        }
+
+        /* ═══ 条状容器 ═══ */
+        .stripe {
+            width: 100%;
+            padding: 2.5rem 1.5rem;
+            border-bottom: 1px solid var(--border-subtle);
+            transition: background-color 0.2s;
+        }
+
+        .stripe:last-of-type {
+            border-bottom: none;
+        }
+
+        .stripe-content {
+            max-width: 960px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* 交替背景色 */
+        .stripe:nth-child(odd) {
+            background-color: var(--bg-stripe);
+        }
+
+        .stripe:nth-child(even) {
+            background-color: var(--bg-stripe-alt);
+        }
+
+        /* 标题条单独深色背景 */
+        .page-title-stripe {
+            background-color: var(--bg-deep) !important;
+            border-bottom: 1px solid var(--border-mid);
+            padding: 3rem 1.5rem 2rem;
+        }
+
+        .page-title-stripe .stripe-content {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .page-title-stripe h1 {
+            font-family: 'Noto Serif SC', serif;
+            font-size: clamp(1.8rem, 4vw, 2.5rem);
+            font-weight: 700;
+            color: var(--gold);
+            letter-spacing: 2px;
+        }
+
+        .page-title-stripe .subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            font-weight: 300;
+        }
+
+        /* 通用条内标题 */
+        .stripe-heading {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stripe-heading i {
+            color: var(--gold-dim);
+            font-size: 1.2rem;
+            width: 1.4rem;
+            text-align: center;
+        }
+
+        .stripe-heading h2 {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        .stripe-heading .line {
+            flex: 1;
+            height: 1px;
+            background: var(--border-mid);
+            margin-left: 0.8rem;
+            min-width: 20px;
+        }
+
+        /* ═══ 统计数字条 ═══ */
+        .stats-horizontal {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem 3rem;
+            align-items: center;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .stat-icon {
+            font-size: 1.5rem;
+            color: var(--gold-dim);
+            width: 2rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.1;
+        }
+
+        .stat-desc {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .stat-trend {
+            font-size: 0.7rem;
+            margin-left: 0.2rem;
+        }
+
+        .trend-up {
+            color: var(--green-accent);
+        }
+
+        .trend-stable {
+            color: var(--amber-accent);
+        }
+
+        /* ═══ 数据质量指标条 ═══ */
+        .quality-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem 3rem;
+            align-items: center;
+        }
+
+        .quality-item {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .progress-ring {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: conic-gradient(var(--gold-dim) 0deg 324deg, #2a2a2a 324deg 360deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .progress-ring::before {
+            content: '';
+            position: absolute;
+            width: 42px;
+            height: 42px;
+            background: var(--bg-stripe);
+            border-radius: 50%;
+        }
+
+        .progress-value {
+            position: relative;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            z-index: 2;
+        }
+
+        .progress-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .quality-item .detail-text {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.15rem;
+        }
+
+        /* ═══ 来源标签 ═══ */
+        .source-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem 1.2rem;
+            align-items: center;
+        }
+
+        .source-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            background: rgba(255, 255, 255, 0.03);
+            padding: 0.35rem 0.9rem;
+            border-radius: 20px;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .source-tag i {
+            color: var(--gold-dim);
+            font-size: 0.8rem;
+        }
+
+        /* ═══ 更新列表 ═══ */
+        .update-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .update-list li {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            transition: background 0.15s;
+        }
+
+        .update-list li:last-child {
+            border-bottom: none;
+        }
+
+        .update-list li:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .update-icon {
+            color: var(--gold-dim);
+            font-size: 0.9rem;
+            width: 1.2rem;
+            text-align: center;
+        }
+
+        .update-date {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            min-width: 5.5rem;
+            letter-spacing: 0.4px;
+            white-space: nowrap;
+        }
+
+        .update-desc {
+            flex: 1;
+        }
+
+        .update-desc strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .update-badge {
+            font-size: 0.7rem;
+            padding: 0.15rem 0.7rem;
+            border-radius: 20px;
+            font-weight: 500;
+            letter-spacing: 0.4px;
+            white-space: nowrap;
+            border: 1px solid transparent;
+        }
+
+        .badge-verified {
+            background: rgba(74, 222, 128, 0.12);
+            color: #4ade80;
+            border-color: rgba(74, 222, 128, 0.3);
+        }
+
+        .badge-pending {
+            background: rgba(251, 191, 36, 0.12);
+            color: #fbbf24;
+            border-color: rgba(251, 191, 36, 0.3);
+        }
+
+        .badge-merged {
+            background: rgba(96, 165, 250, 0.12);
+            color: #60a5fa;
+            border-color: rgba(96, 165, 250, 0.3);
+        }
+
+        /* ═══ 贡献者条 ═══ */
+        .contributor-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem 2rem;
+            align-items: center;
+        }
+
+        .contributor-card {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .avatar {
+            width: 2.2rem;
+            height: 2.2rem;
+            border-radius: 50%;
+            background: var(--border-mid);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            background: rgba(212, 175, 55, 0.08);
+            border: 1px solid var(--border-subtle);
+        }
+
+        .role-tag {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            margin-left: 0.2rem;
+        }
+
+        /* ═══ 开放数据条 ═══ */
+        .download-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .download-card {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 0.7rem 1.2rem;
+            text-decoration: none;
+            color: var(--text-secondary);
+            transition: border-color 0.2s;
+            font-size: 0.85rem;
+        }
+
+        .download-card:hover {
+            border-color: var(--gold-dim);
+            color: var(--text-primary);
+        }
+
+        .download-card i {
+            color: var(--gold-dim);
+        }
+
+        /* ═══ CTA 条 ═══ */
+        .cta-flex {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.2rem;
+        }
+
+        .cta-message {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .cta-message i {
+            color: var(--gold-dim);
+        }
+
+        .btn-gold {
+            background-color: var(--gold-dim);
+            color: #0b0d0f;
+            font-weight: 600;
+            padding: 0.65rem 1.8rem;
+            border-radius: 2rem;
+            text-decoration: none;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+            transition: background 0.25s, box-shadow 0.25s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        .btn-gold:hover {
+            background-color: var(--gold);
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+        }
+
+        .btn-outline {
+            border: 1px solid var(--border-mid);
+            color: var(--text-secondary);
+            padding: 0.6rem 1.6rem;
+            border-radius: 2rem;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: background 0.2s, border-color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .btn-outline:hover {
+            border-color: var(--gold-dim);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        /* ═══ 页脚 ═══ */
+        .footer-stripe {
+            background-color: var(--bg-deep) !important;
+            border-top: 1px solid var(--border-mid);
+            border-bottom: none;
+            padding: 1.5rem 1.5rem;
+            color: var(--text-dim);
+            font-size: 0.75rem;
+        }
+
+        .footer-stripe .stripe-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 0.8rem;
+            align-items: center;
+        }
+
+        .footer-stripe a {
+            color: var(--text-dim);
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        .footer-stripe a:hover {
+            color: var(--gold-dim);
+        }
+
+        /* 响应式 */
+        @media (max-width: 640px) {
+            .stripe {
+                padding: 2rem 1rem;
+            }
+
+            .stats-horizontal {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1.2rem;
+            }
+
+            .update-list li {
+                flex-wrap: wrap;
+                gap: 0.3rem 0.8rem;
+            }
+
+            .cta-flex {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .page-title-stripe .stripe-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ═══════════ 页面标题条 ═══════════ -->
+    <div class="stripe page-title-stripe">
+        <div class="stripe-content">
+            <h1 class="serif"> 开源数据 · 团队整理记录</h1>
+            <span class="subtitle">透明协作，共同维护 — 为流失文物铺就数字归途</span>
+        </div>
+    </div>
+
+    <!-- ═══════════ 核心数据概览条 ═══════════ -->
+    <div class="stripe">
+        <div class="stripe-content">
+            <div class="stripe-heading">
+                <i class="fas fa-chart-bar"></i>
+                <h2>数据总览</h2>
+                <span class="line"></span>
+            </div>
+            <div class="stats-horizontal">
+                <div class="stat-item">
+                    <div class="stat-icon"><i class="fas fa-database"></i></div>
+                    <div>
+                        <div class="stat-value">1,286 <span class="stat-trend trend-up">↗12</span></div>
+                        <div class="stat-desc">文物条目</div>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon"><i class="fas fa-code-branch"></i></div>
+                    <div>
+                        <div class="stat-value">3,402 <span class="stat-trend trend-up">↗58</span></div>
+                        <div class="stat-desc">流转事件</div>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon"><i class="fas fa-globe-americas"></i></div>
+                    <div>
+                        <div class="stat-value">47</div>
+                        <div class="stat-desc">原属国家</div>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon"><i class="fas fa-landmark"></i></div>
+                    <div>
+                        <div class="stat-value">879</div>
+                        <div class="stat-desc">关联机构</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════ 数据质量指标条 ═══════════ -->
+    <div class="stripe">
+        <div class="stripe-content">
+            <div class="stripe-heading">
+                <i class="fas fa-clipboard-check"></i>
+                <h2>数据质量与验证</h2>
+                <span class="line"></span>
+            </div>
+            <div class="quality-grid">
+                <div class="quality-item">
+                    <div class="progress-ring"
+                        style="background: conic-gradient(#4ade80 0deg 324deg, #2a2a2a 324deg 360deg);">
+                        <span class="progress-value">90%</span>
+                    </div>
+                    <div>
+                        <div class="progress-label">已验证条目</div>
+                        <div class="detail-text">1,158 / 1,286 件已通过社区审阅</div>
+                    </div>
+                </div>
+                <div class="quality-item">
+                    <div class="progress-ring"
+                        style="background: conic-gradient(#fbbf24 0deg 72deg, #2a2a2a 72deg 360deg);">
+                        <span class="progress-value">20%</span>
+                    </div>
+                    <div>
+                        <div class="progress-label">待审阅条目</div>
+                        <div class="detail-text">128 件新提交等待核实</div>
+                    </div>
+                </div>
+                <div class="quality-item">
+                    <div class="progress-ring"
+                        style="background: conic-gradient(#60a5fa 0deg 288deg, #2a2a2a 288deg 360deg);">
+                        <span class="progress-value">80%</span>
+                    </div>
+                    <div>
+                        <div class="progress-label">文献引用完整度</div>
+                        <div class="detail-text">平均每条文物含3.2个引用来源</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════ 数据来源条 ═══════════ -->
+    <div class="stripe">
+        <div class="stripe-content">
+            <div class="stripe-heading">
+                <i class="fas fa-book-open"></i>
+                <h2>数据来源与引用规范</h2>
+                <span class="line"></span>
+            </div>
+            <div class="source-tags">
+                <span class="source-tag"><i class="fas fa-university"></i> 大英博物馆公开目录</span>
+                <span class="source-tag"><i class="fas fa-landmark"></i> 卢浮宫数字馆藏</span>
+                <span class="source-tag"><i class="fas fa-scroll"></i> UNESCO 文化遗产数据库</span>
+                <span class="source-tag"><i class="fas fa-file-alt"></i> 学术期刊 (JSTOR, CNKI)</span>
+                <span class="source-tag"><i class="fas fa-newspaper"></i> 文博机构新闻发布</span>
+                <span class="source-tag"><i class="fas fa-user-edit"></i> 社区志愿者提交文献</span>
+                <span class="source-tag"><i class="fas fa-camera"></i> 授权文物影像资料</span>
+                <span class="source-tag"><i class="fas fa-archive"></i> 国家档案与历史记录</span>
+            </div>
+            <p style="color:var(--text-dim); font-size:0.75rem; margin-top:0.8rem;">
+                <i class="fas fa-info-circle"></i> 所有数据条目均要求标注可追溯的原始来源，并遵循 CC BY-SA 4.0 许可。
+            </p>
+        </div>
+    </div>
+
+    <!-- ═══════════ 最近更新列表条 ═══════════ -->
+    <div class="stripe">
+        <div class="stripe-content">
+            <div class="stripe-heading">
+                <i class="fas fa-history"></i>
+                <h2>最近数据贡献动态</h2>
+                <span class="line"></span>
+            </div>
+            <ul class="update-list">
+                <li>
+                    <span class="update-icon"><i class="fas fa-plus-circle"></i></span>
+                    <span class="update-date">2026-05-06</span>
+                    <span class="update-desc"><strong>新增条目：</strong>阿富汗巴克特里亚黄金饰品流失记录</span>
+                    <span class="update-badge badge-pending">待审阅</span>
+                </li>
+                <li>
+                    <span class="update-icon"><i class="fas fa-edit"></i></span>
+                    <span class="update-date">2026-05-04</span>
+                    <span class="update-desc"><strong>状态更新：</strong>贝宁青铜器女王头进入归还谈判新阶段</span>
+                    <span class="update-badge badge-verified">已核实</span>
+                </li>
+                <li>
+                    <span class="update-icon"><i class="fas fa-file-import"></i></span>
+                    <span class="update-date">2026-05-01</span>
+                    <span class="update-desc"><strong>文献补充：</strong>《女史箴图》1900年流失路径补充档案链接</span>
+                    <span class="update-badge badge-verified">已核实</span>
+                </li>
+                <li>
+                    <span class="update-icon"><i class="fas fa-image"></i></span>
+                    <span class="update-date">2026-04-28</span>
+                    <span class="update-desc"><strong>图片更新：</strong>圆明园铜鸡首高清影像由保利博物馆授权提供</span>
+                    <span class="update-badge badge-verified">已核实</span>
+                </li>
+                <li>
+                    <span class="update-icon"><i class="fas fa-map-marker-alt"></i></span>
+                    <span class="update-date">2026-04-25</span>
+                    <span class="update-desc"><strong>数据修正：</strong>玛雅翡翠面具原属地坐标更正为蒂卡尔遗址</span>
+                    <span class="update-badge badge-merged">已合并</span>
+                </li>
+                <li>
+                    <span class="update-icon"><i class="fas fa-globe"></i></span>
+                    <span class="update-date">2026-04-22</span>
+                    <span class="update-desc"><strong>新增国家：</strong>危地马拉流失文物分类首次收录</span>
+                    <span class="update-badge badge-verified">已核实</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- ═══════════ 开放数据下载条 ═══════════ -->
+    <div class="stripe">
+        <div class="stripe-content">
+            <div class="stripe-heading">
+                <i class="fas fa-cloud-download-alt"></i>
+                <h2>开放数据与下载</h2>
+                <span class="line"></span>
+            </div>
+            <div class="download-options">
+                <a href="#" class="download-card">
+                    <i class="fas fa-file-code"></i> JSON 完整数据集
+                </a>
+                <a href="#" class="download-card">
+                    <i class="fas fa-file-csv"></i> CSV 表格格式
+                </a>
+                <a href="#" class="download-card">
+                    <i class="fas fa-code"></i> REST API 文档
+                </a>
+                <a href="#" class="download-card">
+                    <i class="fab fa-github"></i> GitHub 仓库
+                </a>
+            </div>
+            <p style="color:var(--text-dim); font-size:0.75rem; margin-top:0.8rem;">
+                <i class="fas fa-sync-alt"></i> 数据每小时同步一次，所有历史版本可通过 Git 追溯。
+            </p>
+        </div>
+    </div>
+
+    <!-- ═══════════ 本期贡献者条 ═══════════ -->
+    <div class="stripe">
+        <div class="stripe-content">
+            <div class="stripe-heading">
+                <i class="fas fa-hands-helping"></i>
+                <h2>本期活跃贡献者</h2>
+                <span class="line"></span>
+            </div>
+            <div class="contributor-list">
+                <div class="contributor-card">
+                    <div class="avatar"><i class="fas fa-user"></i></div>
+                    <span>Ming Zhang <span class="role-tag">数据提交</span></span>
+                </div>
+                <div class="contributor-card">
+                    <div class="avatar"><i class="fas fa-user"></i></div>
+                    <span>Amara Osei <span class="role-tag">文献审阅</span></span>
+                </div>
+                <div class="contributor-card">
+                    <div class="avatar"><i class="fas fa-user"></i></div>
+                    <span>Eleni Papadopoulos <span class="role-tag">区域协调</span></span>
+                </div>
+                <div class="contributor-card">
+                    <div class="avatar"><i class="fas fa-user"></i></div>
+                    <span>Li Wei <span class="role-tag">技术开发</span></span>
+                </div>
+                <div class="contributor-card">
+                    <div class="avatar"><i class="fas fa-user"></i></div>
+                    <span>Carlos Rivera <span class="role-tag">翻译校对</span></span>
+                </div>
+                <div class="contributor-card">
+                    <div class="avatar"><i class="fas fa-user"></i></div>
+                    <span>Fatima Hassan <span class="role-tag">图像整理</span></span>
+                </div>
+                <div class="contributor-card" style="color:var(--text-dim);">
+                    <i class="fas fa-ellipsis-h"></i> 及另外12位贡献者
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════ 加入贡献条 ═══════════ -->
+    <div class="stripe">
+        <div class="stripe-content">
+            <div class="cta-flex">
+                <div class="cta-message">
+                    <i class="fas fa-seedling"></i>
+                    <span>我们的数据库由<strong style="color:var(--gold);">开源社区</strong>共同构建。每一份文献、每一次审阅，都在为流失文物点亮归家之路。</span>
+                </div>
+                <div style="display: flex; gap:0.8rem; flex-wrap: wrap;">
+                    <a href="#" class="btn-gold" style="padding: 0.6rem 1.6rem; font-size: 0.85rem;">
+                        <i class="fas fa-code-branch"></i> 贡献指南 (GitHub)
+                    </a>
+                    <a href="#" class="btn-outline">
+                        <i class="fas fa-comments"></i> 加入讨论
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════ 页脚条 ═══════════ -->
+    <div class="stripe footer-stripe">
+        <div class="stripe-content">
+            <span>归家 · Heritage Homeward — 社区驱动的非营利知识库</span>
+            <span>内容以 CC BY-SA 4.0 许可发布 · <a href="#">法律声明</a> · <a href="#">联络我们</a></span>
+        </div>
+    </div>
+
+</body>
+
+</html>

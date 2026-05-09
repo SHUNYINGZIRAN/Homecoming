@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>文物详情 · Heritage Homeward</title>
+  <script src="https://cdn.tailwindcss.com">
+  </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Inter:wght@400;600&display=swap');
+
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      overflow-y: scroll;
+      scrollbar-gutter: stable;
+    }
+
+    body {
+      font-family: 'Inter', 'Noto Serif SC', serif;
+      background-color: #0b0d0f;
+      color: #e5e3db;
+      margin: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+      overflow-y: scroll;
+    }
+
+    html::-webkit-scrollbar,
+    body::-webkit-scrollbar {
+      display: none;
+    }
+
+    html {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .serif {
+      font-family: 'Noto Serif SC', serif;
+    }
+
+    .text-gold {
+      color: #b8963c;
+    }
+
+    .bg-gold {
+      background-color: #b8963c;
+    }
+
+    .border-gold {
+      border-color: #b8963c;
+    }
+
+    .hover-gold:hover {
+      color: #b8963c;
+    }
+
+    .card-dark {
+      background: #111317;
+      border: 1px solid #1e2025;
+      border-radius: 12px;
+    }
+
+    .badge-returned {
+      background: #1e3a2fcc;
+      color: #6fcf97;
+      border: 1px solid #2a5a3e;
+    }
+
+    .badge-disputed {
+      background: #3d3a1acc;
+      color: #f2c94c;
+      border: 1px solid #5a5428;
+    }
+
+    .badge-unclaimed {
+      background: #3a1e1ecc;
+      color: #eb5757;
+      border: 1px solid #5a2a2a;
+    }
+
+    .timeline-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #b8963c;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .timeline-line {
+      width: 2px;
+      background: #333;
+      flex-shrink: 0;
+      margin-left: 4px;
+    }
+
+    #detail-minimap {
+      height: 220px;
+      background: #1a1c1e;
+      border-radius: 12px;
+      border: 1px solid #2a2a2a;
+    }
+
+    .leaflet-popup-content-wrapper {
+      background: #1e2023;
+      color: #e5e3db;
+      border: 1px solid #333;
+      border-radius: 8px;
+    }
+
+    .leaflet-popup-tip {
+      background: #1e2023;
+    }
+
+    @media (max-width: 767px) {
+      .detail-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body class="flex flex-col min-h-screen">
+
+  <!-- ========== 导航栏（与流失地图页一致） ========== -->
+  <header class="border-b border-gray-800 px-6 py-3 flex justify-between items-center bg-[#0b0d0f] z-30 sticky top-0">
+    <div class="flex items-center space-x-3">
+      <a href="index.html" class="text-xl serif text-gold hover:opacity-80 transition">
+        <i class="fas fa-archway mr-2"></i>归家 · Heritage Homeward
+      </a>
+    </div>
+    <nav class="space-x-4 md:space-x-6 text-sm text-gray-400">
+      <a href="index.html" class="hover:text-white transition">首页</a>
+      <a href="流失地图.html" class="hover:text-white transition">流失地图</a>
+      <a href="#" class="text-gold font-semibold border-b border-gold pb-1">文物库</a>
+      <a href="时间轴.html" class="hover:text-white transition">时间轴</a>
+      <a href="关于.html" class="hover:text-white transition">关于</a>
+    </nav>
+    <button class="md:hidden text-gray-400 hover:text-white text-lg" id="mobile-menu-btn" aria-label="菜单">
+      <i class="fas fa-bars"></i>
+    </button>
+  </header>
+  <div class="md:hidden bg-[#0b0d0f] border-b border-gray-800 px-6 py-3 space-y-2 hidden" id="mobile-menu">
+    <a href="index.html" class="block text-sm text-gray-400 hover:text-white transition py-1">首页</a>
+    <a href="流失地图.html" class="block text-sm text-gray-400 hover:text-white transition py-1">流失地图</a>
+    <a href="#" class="block text-sm text-gold font-semibold py-1">文物库</a>
+    <a href="时间轴.html" class="block text-sm text-gray-400 hover:text-white transition py-1">时间轴</a>
+    <a href="关于.html" class="block text-sm text-gray-400 hover:text-white transition py-1">关于</a>
+  </div>
+
+  <!-- ========== 主内容区 ========== -->
+  <main class="flex-1 px-4 md:px-8 py-6 max-w-6xl mx-auto w-full">
+    <!-- 面包屑 -->
+    <nav class="text-xs text-gray-500 mb-4" id="breadcrumb">
+      <a href="文物库.html" class="hover:text-white transition">文物库</a>
+      <span class="mx-2">/</span>
+      <span id="breadcrumb-name" class="text-gray-300">加载中...</span>
+    </nav>
+
+    <!-- 加载状态 -->
+    <div id="loading-state" class="text-center py-20">
+      <i class="fas fa-spinner fa-pulse text-4xl text-gold mb-4"></i>
+      <p class="text-gray-400">正在加载文物档案...</p>
+    </div>
+
+    <!-- 文物详情内容（初始隐藏） -->
+    <div id="detail-content" class="hidden">
+      <!-- 顶部概览卡片 -->
+      <div class="card-dark p-5 md:p-8 mb-5">
+        <div class="flex flex-col md:flex-row md:items-start gap-4">
+          <!-- 左侧图标 -->
+          <div
+            class="flex-shrink-0 w-16 h-16 md:w-20 md:h-20 bg-[#1a1c20] rounded-xl flex items-center justify-center text-3xl text-gray-500"
+            id="detail-icon">
+          </div>
+          <!-- 中间信息 -->
+          <div class="flex-1">
+            <div class="flex flex-wrap items-center gap-2 mb-1">
+              <h1 class="text-xl md:text-2xl font-bold serif" id="detail-name"></h1>
+              <span class="text-xs px-2 py-0.5 rounded-full" id="detail-status-badge"></span>
+            </div>
+            <p class="text-sm text-gray-400 mb-3" id="detail-era-material"></p>
+            <!-- 流失路径概览 -->
+            <div class="flex items-center gap-3 text-sm">
+              <a href="流失地图.html" class="inline-flex items-center gap-1.5 text-gold hover:underline transition">
+                <i class="fas fa-globe-asia"></i> 在流失地图中查看
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 主体双栏布局 -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <!-- 左栏：地图 + 描述 -->
+        <div class="md:col-span-2 space-y-5">
+          <!-- 流失路径地图 -->
+          <div class="card-dark p-4">
+            <h3 class="text-base font-bold serif mb-3 flex items-center gap-2"><i
+                class="fas fa-route text-gold"></i>流失路线</h3>
+            <div id="detail-minimap"></div>
+            <p class="text-xs text-gray-600 mt-2">* 路线基于学术研究还原，实际路径可能存在偏差。</p>
+          </div>
+
+          <!-- 详细描述 -->
+          <div class="card-dark p-5 md:p-6">
+            <h3 class="text-base font-bold serif mb-3 flex items-center gap-2"><i
+                class="fas fa-align-left text-gold"></i>文物描述</h3>
+            <p class="text-sm text-gray-300 leading-relaxed" id="detail-description"></p>
+          </div>
+
+          <!-- 历史背景 -->
+          <div class="card-dark p-5 md:p-6">
+            <h3 class="text-base font-bold serif mb-3 flex items-center gap-2"><i
+                class="fas fa-history text-gold"></i>历史背景</h3>
+            <p class="text-sm text-gray-300 leading-relaxed" id="detail-background"></p>
+          </div>
+
+          <!-- 艺术与文化价值 -->
+          <div class="card-dark p-5 md:p-6">
+            <h3 class="text-base font-bold serif mb-3 flex items-center gap-2"><i
+                class="fas fa-palette text-gold"></i>艺术特征与文化价值</h3>
+            <p class="text-sm text-gray-300 leading-relaxed" id="detail-artistic-value"></p>
+          </div>
+        </div>
+
+        <!-- 右栏：信息卡 + 归家时间轴 -->
+        <div class="space-y-5">
+          <!-- 文物信息卡片 -->
+          <div class="card-dark p-5">
+            <h3 class="text-base font-bold serif mb-3 flex items-center gap-2"><i
+                class="fas fa-info-circle text-gold"></i>基本信息</h3>
+            <dl class="space-y-3 text-sm">
+              <div class="flex justify-between">
+                <dt class="text-gray-500">名称</dt>
+                <dd id="info-name" class="text-gray-200 text-right ml-2"></dd>
+              </div>
+              <div class="flex justify-between">
+                <dt class="text-gray-500">年代</dt>
+                <dd id="info-era" class="text-gray-200 text-right ml-2"></dd>
+              </div>
+              <div class="flex justify-between">
+                <dt class="text-gray-500">材质</dt>
+                <dd id="info-material" class="text-gray-200 text-right ml-2"></dd>
+              </div>
+              <div class="flex justify-between">
+                <dt class="text-gray-500">类别</dt>
+                <dd id="info-category" class="text-gray-200 text-right ml-2"></dd>
+              </div>
+              <div class="flex justify-between">
+                <dt class="text-gray-500">原属地</dt>
+                <dd id="info-origin" class="text-gray-200 text-right ml-2"></dd>
+              </div>
+              <div class="flex justify-between">
+                <dt class="text-gray-500">现藏地</dt>
+                <dd id="info-current" class="text-gray-200 text-right ml-2"></dd>
+              </div>
+              <div class="flex justify-between">
+                <dt class="text-gray-500">流失事件</dt>
+                <dd id="info-event" class="text-gray-200 text-right ml-2"></dd>
+              </div>
+              <div class="flex justify-between">
+                <dt class="text-gray-500">归还状态</dt>
+                <dd id="info-status" class="text-right ml-2"></dd>
+              </div>
+            </dl>
+          </div>
+
+          <!-- 归家时间轴 -->
+          <div class="card-dark p-5">
+            <h3 class="text-base font-bold serif mb-3 flex items-center gap-2"><i
+                class="fas fa-stream text-gold"></i>关键节点</h3>
+            <div class="space-y-3" id="timeline">
+              <!-- 动态生成 -->
+            </div>
+          </div>
+
+          <!-- 来源引用 -->
+          <div class="card-dark p-5">
+            <h3 class="text-base font-bold serif mb-3 flex items-center gap-2"><i
+                class="fas fa-book-open text-gold"></i>来源与引用</h3>
+            <ul class="text-xs text-gray-400 space-y-1" id="sources">
+              <li>☆ 数据持续更新，欢迎学者贡献可靠来源。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="border-t border-gray-800 px-6 py-4 text-center text-xs text-gray-600 mt-auto">
+    <p>☆ 数据持续补充，欢迎贡献文献与坐标。 <a href="#" class="text-gold underline">如何参与开源贡献 →</a></p>
+  </footer>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    // 与文物库共享的完整数据集
+    const artifacts = [
+      { id: 1, name: '圆明园十二生肖铜鸡首', category: '青铜器', era: '清乾隆', eraYear: 1759, material: '红铜', origin: [39.9042, 116.4074], originName: '中国 北京 圆明园', current: [51.5194, -0.127], currentName: '英国 伦敦 大英博物馆', event: '1860年 英法联军焚掠圆明园', status: 'returned', description: '原为圆明园海晏堂前喷水池构件，为十二生肖水力钟的组成部分。铜鸡首雕刻精细，羽冠高耸，喙部线条流畅，展现了清代宫廷造办处工匠的高超写实技艺。十二生肖铜像每日按时辰依次喷水，正午时分十二生肖同时喷水，是中西合璧的园林艺术奇观。1860年英法联军焚掠圆明园后流失海外，后由民间人士购回并捐赠国家，现藏保利艺术博物馆。', background: '圆明园十二生肖兽首铜像是清乾隆年间由宫廷造办处铸造，原安放于圆明园海晏堂前的水力钟喷池两侧。1860年第二次鸦片战争期间，英法联军攻入北京，洗劫并焚烧圆明园，十二兽首自此流散世界各地。近年来，在国家文物局和社会各界努力下，牛首、虎首、猴首、猪首、马首、鸡首已回归中国，狗首曾短暂现身拍卖市场，龙首据传现存台湾，蛇首、羊首、鼠首、兔首仍下落不明。', artisticValue: '十二生肖铜像是18世纪中国宫廷艺术的杰出代表，融合了中国传统生肖文化与西洋水力机械技术。铜像造型写实，细节丰富，衣纹、毛发纤毫毕现，体现了乾隆盛世中西文化交流的深度与宫廷工艺的极致追求。作为圆明园建筑群的重要组成部分，它们不仅具有极高的艺术价值，更是近代中国屈辱历史的见证。', imageIcon: 'fa-dragon', timeline: [{ year: '1759', event: '铸造完成，安放于圆明园海晏堂' }, { year: '1860', event: '英法联军焚掠圆明园，铜鸡首流失海外' }, { year: '2005', event: '现身海外拍卖市场' }, { year: '2019', event: '由民间人士购回并捐赠国家' }, { year: '至今', event: '藏于保利艺术博物馆，向公众展出' }] },
+      { id: 2, name: '圆明园十二生肖铜马首', category: '青铜器', era: '清乾隆', eraYear: 1759, material: '红铜', origin: [39.9042, 116.4074], originName: '中国 北京 圆明园', current: [48.8566, 2.3522], currentName: '法国 巴黎 曾藏枫丹白露宫', event: '1860年 圆明园劫掠', status: 'returned', description: '马首造型生动，双目圆睁，鬃毛分缕细致，展现出骏马昂首嘶鸣的瞬间动态。铜像表面原有鎏金装饰，历经百年沧桑仍有残留，可见当年之华美。2007年由澳门商人何鸿燊先生以6910万港币购回，并捐赠给国家文物局，现藏圆明园管理处。', background: '马首是十二生肖中最早通过竞拍购回的兽首之一。2007年香港苏富比拍卖行宣布拍卖马首的消息传出后，引发国内强烈反响。何鸿燊先生斥资购回并无偿捐赠，开创了民间力量助力流失文物回归的先河。这一事件极大提升了公众对流失文物的关注度，也为后续兽首的回归提供了范例。', artisticValue: '马首是十二生肖中制作最为精良的作品之一，马鬃的雕刻采用了分层处理，呈现出蓬松的质感，这在清代青铜铸造工艺中极为罕见。它的回归不仅是一次成功的文物追索案例，也象征着流失文物的归家之路并非不可能。', imageIcon: 'fa-horse-head', timeline: [{ year: '1759', event: '铸造完成' }, { year: '1860', event: '被掳至法国，后藏于枫丹白露宫' }, { year: '2007', event: '何鸿燊先生以6910万港币购回' }, { year: '2007', event: '捐赠国家文物局，藏于圆明园管理处' }] },
+      { id: 7, name: '顾恺之《女史箴图》唐摹本', category: '书画', era: '唐代摹本', eraYear: 700, material: '绢本设色', origin: [39.9042, 116.4074], originName: '中国 北京 清宫', current: [51.5194, -0.127], currentName: '英国 伦敦 大英博物馆', event: '1900年 八国联军侵华期间流失', status: 'unclaimed', description: '《女史箴图》为东晋顾恺之依据张华《女史箴》一文所作，原作已佚。此唐代摹本共十二段（现存九段），以连环画形式描绘汉至晋代贤德女性的故事，劝诫后宫妇女遵守礼教。绘画线条飘逸流畅如“春蚕吐丝”，设色典雅含蓄，人物神态端庄娴静。卷末有唐代弘文馆印及诸多收藏印鉴，历经宋徽宗、乾隆等帝王珍藏，清末从清宫流出，1903年入藏大英博物馆。', background: '《女史箴图》唐代摹本原为清宫旧藏，乾隆皇帝极为珍爱，曾多次题跋。1900年八国联军入侵北京，清宫遭劫，此卷流出宫外。1903年，大英博物馆从约翰逊上尉手中购得此画。由于保护条件有限，大英博物馆曾在修复过程中采用日式装裱裁切画面，造成一定损伤。目前该画因脆弱极少展出，中国方面尚未正式提出归还要求，但学术界的呼吁从未停止。', artisticValue: '作为中国早期人物画的巅峰之作，《女史箴图》展现了魏晋至唐代人物画“以形写神”的美学理念。其线描技法对后世影响深远，被誉为“中国绘画史上最杰出的作品之一”。画卷上的历代收藏印和题跋构成了完整的流传史，是中国书画鉴藏传统的生动样本。', imageIcon: 'fa-paint-brush', timeline: [{ year: '约4世纪', event: '顾恺之创作原作' }, { year: '约7-8世纪', event: '唐代宫廷画家摹写此卷' }, { year: '18世纪', event: '入藏清宫，乾隆皇帝多次题跋' }, { year: '1900年', event: '八国联军侵华期间从清宫流失' }, { year: '1903年', event: '大英博物馆购入收藏至今' }] },
+      { id: 5, name: '罗塞塔石碑', category: '雕塑石刻', era: '公元前196年', eraYear: -196, material: '花岗闪长岩', origin: [31.2001, 29.9187], originName: '埃及 拉希德', current: [51.5194, -0.127], currentName: '英国 伦敦 大英博物馆', event: '1801年 英军从法军手中缴获并运走', status: 'disputed', description: '罗塞塔石碑是一块黑色花岗闪长岩石碑，高114厘米，宽72厘米，厚28厘米。碑文以三种文字刻写：古埃及象形文（圣书体）、埃及世俗体（草书体）和古希腊文。正是由于古希腊文的对照，法国学者商博良于1822年成功破译了古埃及象形文字，打开了通往古埃及文明的大门。石碑原为托勒密五世颁布的诏书，目前埃及政府持续呼吁归还，大英博物馆以“合法获得”为由拒绝。', background: '1799年拿破仑远征埃及期间，法军在罗塞塔（今拉希德）修筑防御工事时发现了这块石碑。1801年英军击败法军后，根据亚历山大条约将石碑及其他埃及文物运至英国。自1802年起，罗塞塔石碑一直在大英博物馆展出，成为该馆最受欢迎的展品之一。埃及自独立后多次要求归还，2011年埃及爆发革命后，归还呼声更加高涨。联合国教科文组织曾介入调解，但大英博物馆以“环球博物馆”理论为由拒绝。', artisticValue: '罗塞塔石碑本身并非杰出的艺术品，但它作为人类语言和文明的钥匙，其文化价值无可估量。碑文保存完好，三种文字对照书写，是研究古埃及语言、历史和政治的重要文献。石碑的发现和破译开创了埃及学这一学科，被誉为“近代考古学诞生的标志之一”。', imageIcon: 'fa-scroll', timeline: [{ year: '公元前196年', event: '托勒密五世下令刻制此碑' }, { year: '1799年', event: '拿破仑远征军发现于埃及拉希德' }, { year: '1801年', event: '英军缴获并运至英国' }, { year: '1802年', event: '入藏大英博物馆' }, { year: '1822年', event: '商博良破译古埃及象形文字' }, { year: '2003年', event: '埃及正式提出归还要求' }] },
+      { id: 9, name: '敦煌藏经洞经卷', category: '文献典籍', era: '唐至北宋', eraYear: 900, material: '纸本墨书', origin: [40.0415, 94.8033], originName: '中国 甘肃 敦煌莫高窟', current: [51.5194, -0.127], currentName: '英国 伦敦 大英图书馆', event: '1907-1914年 斯坦因、伯希和等骗取', status: 'unclaimed', description: '敦煌藏经洞（莫高窟第17窟）于1900年由道士王圆箓发现，内藏公元5至11世纪的文书、绢画、刺绣等文物约5万余件。其中佛教经典占大多数，也包括儒家典籍、道教文献、景教、摩尼教等多种宗教文献，以及契约、账册、信件等世俗文书。文字涵盖汉文、藏文、梵文、回鹘文、于阗文、粟特文等十余种语言，是中古时期丝绸之路文化的“百科全书”。', background: '1907年，英国探险家斯坦因来到敦煌，以约40块马蹄银的价格从王圆箓手中购得大量经卷和绘画，运至英国后分藏于大英图书馆和大英博物馆。1908年，法国汉学家伯希和接踵而至，以其汉学造诣挑选了最精华的部分运至巴黎。此后，日本、俄国、美国等探险队也陆续掠走大量敦煌文物。目前敦煌文献分散于全球十余个国家的博物馆和图书馆，中国国家图书馆藏有约16000件，为世界各收藏机构之最。', artisticValue: '敦煌文献是中古时期丝绸之路文化交流的实物见证，涵盖了宗教、历史、文学、艺术、科技等诸多领域。其中的佛教经卷书法精美，唐代写经体代表了当时书法艺术的高度；绢本绘画色彩鲜艳，是研究中国绘画史的重要实物。敦煌文献的发现催生了“敦煌学”这门国际性学科，成为研究古代丝绸之路文明的核心材料。', imageIcon: 'fa-book', timeline: [{ year: '约5-11世纪', event: '僧侣将各类文书封存于藏经洞中' }, { year: '1900年', event: '王圆箓道士发现藏经洞' }, { year: '1907年', event: '斯坦因掠走大量经卷运至英国' }, { year: '1908年', event: '伯希和掠走精华部分运至法国' }, { year: '1910-1914年', event: '日、俄探险队继续掠取' }, { year: '至今', event: '分散收藏于十余国家，敦煌学持续研究' }] },
+    ];
+
+    // 获取 URL 参数
+    const urlParams = new URLSearchParams(window.location.search);
+    const artifactId = parseInt(urlParams.get('id'));
+
+    // DOM 元素
+    const loadingState = document.getElementById('loading-state');
+    const detailContent = document.getElementById('detail-content');
+    const breadcrumbName = document.getElementById('breadcrumb-name');
+
+    // 渲染详情页
+    function renderDetail(artifact) {
+      // 显示内容区，隐藏加载状态
+      loadingState.classList.add('hidden');
+      detailContent.classList.remove('hidden');
+      breadcrumbName.textContent = artifact.name;
+      document.title = `${artifact.name} · Heritage Homeward`;
+
+      // 状态标签
+      const statusLabels = { returned: '已归国', disputed: '争议中', unclaimed: '未申索' };
+      const badgeClasses = { returned: 'badge-returned', disputed: 'badge-disputed', unclaimed: 'badge-unclaimed' };
+
+      // 顶部概览
+      document.getElementById('detail-icon').innerHTML = `<i class="fas ${artifact.imageIcon || 'fa-archive'}"></i>`;
+      document.getElementById('detail-name').textContent = artifact.name;
+      document.getElementById('detail-era-material').textContent = `${artifact.era} · ${artifact.material}`;
+
+      const statusBadge = document.getElementById('detail-status-badge');
+      statusBadge.textContent = statusLabels[artifact.status];
+      statusBadge.className = `text-xs px-2 py-0.5 rounded-full ${badgeClasses[artifact.status]}`;
+
+      // 详细描述
+      document.getElementById('detail-description').textContent = artifact.description;
+      document.getElementById('detail-background').textContent = artifact.background || '暂无详细历史背景记录，欢迎学者贡献文献资料。';
+      document.getElementById('detail-artistic-value').textContent = artifact.artisticValue || '暂无艺术价值详细记录。';
+
+      // 右侧信息卡
+      document.getElementById('info-name').textContent = artifact.name;
+      document.getElementById('info-era').textContent = artifact.era;
+      document.getElementById('info-material').textContent = artifact.material;
+      document.getElementById('info-category').textContent = artifact.category || '未分类';
+      document.getElementById('info-origin').textContent = artifact.originName;
+      document.getElementById('info-current').textContent = artifact.currentName;
+      document.getElementById('info-event').textContent = artifact.event;
+      const infoStatus = document.getElementById('info-status');
+      infoStatus.textContent = statusLabels[artifact.status];
+      infoStatus.className = `text-xs px-2 py-0.5 rounded-full inline-block ${badgeClasses[artifact.status]}`;
+
+      // 时间轴
+      const timelineContainer = document.getElementById('timeline');
+      timelineContainer.innerHTML = '';
+      if (artifact.timeline && artifact.timeline.length > 0) {
+        artifact.timeline.forEach((item, index) => {
+          const div = document.createElement('div');
+          div.className = 'flex gap-3';
+          div.innerHTML = `
+            <div class="flex flex-col items-center">
+              <div class="timeline-dot"></div>
+              ${index < artifact.timeline.length - 1 ? '<div class="timeline-line flex-1"></div>' : ''}
+            </div>
+            <div class="pb-3">
+              <span class="text-xs text-gold font-semibold">${item.year}</span>
+              <p class="text-xs text-gray-300 mt-0.5">${item.event}</p>
+            </div>
+          `;
+          timelineContainer.appendChild(div);
+        });
+      } else {
+        timelineContainer.innerHTML = '<p class="text-xs text-gray-500">暂无时间节点记录。</p>';
+      }
+
+      // 初始化小地图
+      const map = L.map('detail-minimap', {
+        center: [(artifact.origin[0] + artifact.current[0]) / 2, (artifact.origin[1] + artifact.current[1]) / 2],
+        zoom: 3,
+        scrollWheelZoom: false,
+        zoomControl: false
+      });
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OSM &copy; CARTO'
+      }).addTo(map);
+
+      const originIcon = L.divIcon({
+        html: '<div style="background:#b8963c; width:10px; height:10px; border-radius:50%; border:2px solid #fff;"></div>',
+        iconSize: [12, 12]
+      });
+      const currentIcon = L.divIcon({
+        html: '<div style="background:#e57373; width:10px; height:10px; border-radius:50%; border:2px solid #fff;"></div>',
+        iconSize: [12, 12]
+      });
+
+      L.marker(artifact.origin, { icon: originIcon }).addTo(map).bindPopup(`<b>原属地</b><br>${artifact.originName}`);
+      L.marker(artifact.current, { icon: currentIcon }).addTo(map).bindPopup(`<b>现藏地</b><br>${artifact.currentName}`);
+      L.polyline([artifact.origin, artifact.current], {
+        color: '#b8963c',
+        weight: 2,
+        dashArray: '6 6'
+      }).addTo(map);
+
+      map.fitBounds(L.latLngBounds([artifact.origin, artifact.current]), { padding: [30, 30] });
+    }
+
+    // 初始化
+    document.addEventListener('DOMContentLoaded', () => {
+      const artifact = artifacts.find(a => a.id === artifactId);
+      if (artifact) {
+        renderDetail(artifact);
+      } else {
+        loadingState.innerHTML = '<i class="fas fa-exclamation-triangle text-4xl text-red-400 mb-4"></i><p class="text-gray-400">未找到该文物档案</p><a href="文物库.html" class="text-gold underline text-sm mt-3 inline-block">返回文物库</a>';
+      }
+    });
+
+    // 移动端菜单切换
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+  </script>
+</body>
+
+</html>

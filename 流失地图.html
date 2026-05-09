@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>探索流失地图 · Heritage Homeward</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Inter:wght@400;600&display=swap');
+
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+    }
+
+    body {
+      font-family: 'Inter', 'Noto Serif SC', serif;
+      background-color: #0b0d0f;
+      color: #e5e3db;
+      margin: 0;
+    }
+
+    .serif {
+      font-family: 'Noto Serif SC', serif;
+    }
+
+    .text-gold {
+      color: #b8963c;
+    }
+
+    .bg-gold {
+      background-color: #b8963c;
+    }
+
+    .border-gold {
+      border-color: #b8963c;
+    }
+
+    .hover-gold:hover {
+      color: #b8963c;
+    }
+
+    #map {
+      height: calc(100vh - 64px);
+      width: 100%;
+      background: #1a1c1e;
+    }
+
+    .leaflet-popup-content-wrapper {
+      background: #1e2023;
+      color: #e5e3db;
+      border: 1px solid #333;
+      border-radius: 8px;
+    }
+
+    .leaflet-popup-tip {
+      background: #1e2023;
+    }
+
+    .leaflet-control-zoom {
+      display: none !important;
+    }
+
+    .leaflet-control-attribution {
+      background: rgba(30, 32, 35, 0.8) !important;
+      color: #888 !important;
+      font-size: 10px !important;
+    }
+
+    .leaflet-control-attribution a {
+      color: #b8963c !important;
+    }
+
+    .sidebar::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+      background: #444;
+      border-radius: 2px;
+    }
+
+    #artifact-list::-webkit-scrollbar {
+      display: none;
+    }
+
+    #artifact-list {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .artifact-item:hover {
+      background-color: #1a1c20;
+      border-left: 3px solid #b8963c;
+    }
+
+    .badge-returned {
+      background: #1e3a2f;
+      color: #6fcf97;
+    }
+
+    .badge-disputed {
+      background: #3d3a1a;
+      color: #f2c94c;
+    }
+
+    .badge-unclaimed {
+      background: #3a1e1e;
+      color: #eb5757;
+    }
+
+    /* 搜索框样式 */
+    .search-input {
+      background: #1a1c20;
+      border: 1px solid #333;
+      color: #e5e3db;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #b8963c;
+    }
+
+    .search-input::placeholder {
+      color: #666;
+    }
+  </style>
+</head>
+
+<body class="flex flex-col h-screen overflow-hidden">
+
+  <!-- 导航栏 -->
+  <header class="border-b border-gray-800 px-6 py-3 flex justify-between items-center bg-[#0b0d0f] z-30">
+    <div class="flex items-center space-x-3">
+      <a href="index.html" class="text-xl serif text-gold hover:opacity-80 transition"><i
+          class="fas fa-archway mr-2"></i>归家 · Heritage Homeward</a>
+    </div>
+    <nav class="space-x-4 md:space-x-6 text-sm text-gray-400">
+      <a href="index.html" class="hover:text-white transition">首页</a>
+      <a href="#" class="text-gold font-semibold border-b border-gold pb-1">流失地图</a>
+      <a href="文物库.html" class="hover:text-white transition">文物库</a>
+      <a href="时间轴.html" class="hover:text-white transition">时间轴</a>
+      <a href="关于.html" class="hover:text-white transition">关于</a>
+    </nav>
+  </header>
+
+  <!-- 主内容：地图 + 右侧面板 -->
+  <div class="flex flex-1 relative">
+    <div id="map" class="flex-1 z-10"></div>
+
+    <!-- 侧边栏 -->
+    <div
+      class="w-80 md:w-96 bg-[#111317] border-l border-gray-800 flex flex-col h-full sidebar overflow-y-auto transition-all duration-300 z-20"
+      id="info-panel">
+      <div class="p-5 border-b border-gray-800">
+        <h2 class="text-xl serif font-bold mb-1"><i class="fas fa-globe-asia text-gold mr-2"></i>流失脉络</h2>
+        <p class="text-xs text-gray-500">点击地图标记或列表项查看详情</p>
+      </div>
+
+      <!-- 统计卡片 -->
+      <div class="grid grid-cols-2 gap-3 p-4" id="stats-cards">
+        <!-- 动态统计数字 -->
+      </div>
+
+      <!-- 实时搜索框 -->
+      <div class="px-4 pb-3">
+        <div class="relative">
+          <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
+          <input type="text" id="search-input" class="search-input w-full pl-9 pr-8 py-2 rounded-lg text-sm"
+            placeholder="搜索文物、原属地或现藏地...">
+          <button id="clear-search"
+            class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white hidden"><i
+              class="fas fa-times-circle"></i></button>
+        </div>
+      </div>
+
+      <!-- 状态筛选按钮 -->
+      <div class="px-4 pb-2">
+        <div class="flex space-x-2">
+          <button
+            class="filter-btn px-3 py-1 text-xs rounded-full border border-gray-700 text-gray-300 hover:border-gray-500"
+            data-filter="all">全部</button>
+          <button
+            class="filter-btn px-3 py-1 text-xs rounded-full border border-gray-700 text-gray-300 hover:border-gray-500"
+            data-filter="returned">已归国</button>
+          <button
+            class="filter-btn px-3 py-1 text-xs rounded-full border border-gray-700 text-gray-300 hover:border-gray-500"
+            data-filter="disputed">争议中</button>
+          <button
+            class="filter-btn px-3 py-1 text-xs rounded-full border border-gray-700 text-gray-300 hover:border-gray-500"
+            data-filter="unclaimed">未申索</button>
+        </div>
+      </div>
+
+      <!-- 文物列表 -->
+      <div class="px-4 pb-4 space-y-2 overflow-y-auto flex-1 min-h-0" id="artifact-list"
+        style="max-height: calc(100vh - 480px);"></div>
+
+      <div class="mt-auto p-4 border-t border-gray-800 text-xs text-gray-500">
+        <p>☆ 数据持续补充，欢迎贡献文献与坐标。</p>
+        <a href="#" class="text-gold underline mt-1 inline-block">如何参与开源贡献 →</a>
+      </div>
+    </div>
+
+    <!-- 移动端面板切换 -->
+    <button class="md:hidden fixed bottom-5 right-5 bg-gold text-black p-3 rounded-full shadow-lg z-50"
+      id="toggle-panel">
+      <i class="fas fa-list"></i>
+    </button>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    // ---------- 流失文物数据集 ----------
+    const artifacts = [
+      {
+        id: 1,
+        name: '圆明园十二生肖铜鸡首',
+        origin: [39.9042, 116.4074],
+        originName: '中国 北京 圆明园',
+        current: [51.5194, -0.127],
+        currentName: '英国 伦敦 大英博物馆',
+        event: '1860年 英法联军焚掠圆明园',
+        status: 'returned',
+        description: '原为圆明园海晏堂前喷水池构件，1860年流失，后由民间购回并捐赠国家，现藏保利艺术博物馆。'
+      },
+      {
+        id: 2,
+        name: '圆明园十二生肖铜马首',
+        origin: [39.9042, 116.4074],
+        originName: '中国 北京 圆明园',
+        current: [48.8566, 2.3522],
+        currentName: '法国 巴黎 曾藏枫丹白露宫',
+        event: '1860年 圆明园劫掠',
+        status: 'returned',
+        description: '1860年被掳至法国，2007年由澳门商人购回并捐赠给国家。'
+      },
+      {
+        id: 3,
+        name: '贝宁青铜器（女王头）',
+        origin: [6.317, 5.614],
+        originName: '尼日利亚 贝宁城',
+        current: [51.5194, -0.127],
+        currentName: '英国 伦敦 大英博物馆',
+        event: '1897年 英国贝宁远征军掠夺',
+        status: 'disputed',
+        description: '贝宁青铜器分散在欧美多个博物馆，近年部分机构已启动归还谈判。'
+      },
+      {
+        id: 4,
+        name: '贝宁青铜器（奥巴像）',
+        origin: [6.317, 5.614],
+        originName: '尼日利亚 贝宁城',
+        current: [52.517, 13.388],
+        currentName: '德国 柏林 民族学博物馆',
+        event: '1897年 掠夺',
+        status: 'disputed',
+        description: '2021年德国政府同意归还部分贝宁青铜器。'
+      },
+      {
+        id: 5,
+        name: '罗塞塔石碑',
+        origin: [31.2001, 29.9187],
+        originName: '埃及 拉希德',
+        current: [51.5194, -0.127],
+        currentName: '英国 伦敦 大英博物馆',
+        event: '1801年 英军从法军手中缴获并运走',
+        status: 'disputed',
+        description: '埃及政府持续呼吁归还，大英博物馆拒绝。'
+      },
+      {
+        id: 6,
+        name: '帕特农神庙雕塑（埃尔金大理石）',
+        origin: [37.9715, 23.7266],
+        originName: '希腊 雅典 帕特农神庙',
+        current: [51.5194, -0.127],
+        currentName: '英国 伦敦 大英博物馆',
+        event: '1801-1812年 埃尔金伯爵移除',
+        status: 'disputed',
+        description: '希腊长期要求归还，联合国教科文组织曾调解。'
+      },
+      {
+        id: 7,
+        name: '顾恺之《女史箴图》唐摹本',
+        origin: [39.9042, 116.4074],
+        originName: '中国 北京 清宫',
+        current: [51.5194, -0.127],
+        currentName: '英国 伦敦 大英博物馆',
+        event: '1900年 八国联军侵华期间流失',
+        status: 'unclaimed',
+        description: '为大英博物馆镇馆之宝之一，中国尚未正式提出归还要求。'
+      },
+      {
+        id: 8,
+        name: '龙门石窟《帝后礼佛图》',
+        origin: [34.5595, 112.4678],
+        originName: '中国 河南 洛阳 龙门石窟',
+        current: [40.7794, -73.9632],
+        currentName: '美国 纽约 大都会艺术博物馆',
+        event: '1930年代 盗凿走私',
+        status: 'unclaimed',
+        description: '于1930年代被凿成小块偷运出境，现藏大都会博物馆。'
+      },
+      {
+        id: 9,
+        name: '敦煌藏经洞经卷',
+        origin: [40.0415, 94.8033],
+        originName: '中国 甘肃 敦煌莫高窟',
+        current: [51.5194, -0.127],
+        currentName: '英国 伦敦 大英图书馆',
+        event: '1907-1914年 斯坦因、伯希和等骗取',
+        status: 'unclaimed',
+        description: '大量敦煌文献流失海外，分藏于英、法、俄、日等国。'
+      },
+      {
+        id: 10,
+        name: '尼日利亚 伊费陶俑',
+        origin: [7.4905, 4.5521],
+        originName: '尼日利亚 伊费',
+        current: [52.517, 13.388],
+        currentName: '德国 柏林',
+        event: '殖民时期掠夺',
+        status: 'disputed',
+        description: '尼日利亚国家博物馆多次请求归还。'
+      }
+    ];
+
+    // 当前筛选状态
+    let currentStatusFilter = 'all';
+    let currentSearchTerm = '';
+
+    // 地图相关
+    const map = L.map('map', {
+      center: [15, 5],
+      zoom: 2.5,
+      scrollWheelZoom: true,
+      zoomControl: false
+    });
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>'
+    }).addTo(map);
+
+    const originIcon = L.divIcon({
+      html: '<div style="background:#b8963c; width:10px; height:10px; border-radius:50%; border:2px solid #f1e0b0;"></div>',
+      iconSize: [14, 14],
+      className: ''
+    });
+    const currentIcon = L.divIcon({
+      html: '<div style="background:#e57373; width:9px; height:9px; border-radius:50%; border:2px solid #ffcdd2;"></div>',
+      iconSize: [13, 13],
+      className: ''
+    });
+
+    // 存储图层以便清除
+    let currentPolylines = [];
+    let currentMarkers = [];
+
+    // 清除地图上的所有动态元素
+    function clearMapLayers() {
+      currentPolylines.forEach(p => map.removeLayer(p));
+      currentMarkers.forEach(m => map.removeLayer(m));
+      currentPolylines = [];
+      currentMarkers = [];
+    }
+
+    // 根据筛选条件获取文物列表
+    function getFilteredArtifacts() {
+      return artifacts.filter(a => {
+        // 状态筛选
+        const statusMatch = currentStatusFilter === 'all' || a.status === currentStatusFilter;
+        if (!statusMatch) return false;
+
+        // 搜索词过滤（不区分大小写）
+        if (!currentSearchTerm.trim()) return true;
+        const term = currentSearchTerm.trim().toLowerCase();
+        return (
+          a.name.toLowerCase().includes(term) ||
+          a.originName.toLowerCase().includes(term) ||
+          a.currentName.toLowerCase().includes(term) ||
+          a.event.toLowerCase().includes(term)
+        );
+      });
+    }
+
+    // 渲染侧边栏列表与地图元素
+    function render() {
+      const filtered = getFilteredArtifacts();
+      const listContainer = document.getElementById('artifact-list');
+      listContainer.innerHTML = '';
+
+      // 更新统计数字
+      document.getElementById('stats-cards').innerHTML = `
+        <div class="bg-gray-800/50 rounded-lg p-3 text-center">
+          <div class="text-2xl font-bold text-gold">${filtered.length}</div>
+          <div class="text-xs text-gray-400">匹配文物</div>
+        </div>
+        <div class="bg-gray-800/50 rounded-lg p-3 text-center">
+          <div class="text-2xl font-bold text-gold">${new Set(filtered.map(a => a.originName)).size}</div>
+          <div class="text-xs text-gray-400">原属地</div>
+        </div>
+        <div class="bg-gray-800/50 rounded-lg p-3 text-center">
+          <div class="text-2xl font-bold text-gold">${filtered.filter(a => a.status === 'returned').length}</div>
+          <div class="text-xs text-gray-400">已归还</div>
+        </div>
+        <div class="bg-gray-800/50 rounded-lg p-3 text-center">
+          <div class="text-2xl font-bold text-gold">${filtered.filter(a => a.status !== 'returned').length}</div>
+          <div class="text-xs text-gray-400">未归/争议</div>
+        </div>
+      `;
+
+      if (filtered.length === 0) {
+        listContainer.innerHTML = '<p class="text-gray-500 text-sm text-center py-4">未找到匹配的文物</p>';
+      }
+
+      // 清除地图图层
+      clearMapLayers();
+
+      // 绘制每个文物
+      filtered.forEach(a => {
+        // 列表项
+        const item = document.createElement('div');
+        item.className = 'artifact-item p-3 rounded-lg cursor-pointer transition border border-transparent';
+        item.innerHTML = `
+          <div class="flex justify-between items-start">
+            <span class="font-bold text-sm serif">${a.name}</span>
+            <span class="text-xs ml-2 px-2 py-0.5 rounded-full ${a.status === 'returned' ? 'badge-returned' : (a.status === 'disputed' ? 'badge-disputed' : 'badge-unclaimed')
+          }">${a.status === 'returned' ? '已归国' : (a.status === 'disputed' ? '争议中' : '未申索')
+          }</span>
+          </div>
+          <p class="text-xs text-gray-500 mt-1"><i class="fas fa-map-marker-alt text-gold text-xs"></i> ${a.originName} → ${a.currentName}</p>
+          <p class="text-xs text-gray-600 mt-0.5">${a.event}</p>
+        `;
+        item.addEventListener('click', () => {
+          map.flyToBounds(L.latLngBounds([a.origin, a.current]), { padding: [50, 50] });
+        });
+        listContainer.appendChild(item);
+
+        // 流失路径线
+        const polyline = L.polyline([a.origin, a.current], {
+          color: '#b8963c',
+          weight: 1.8,
+          dashArray: a.status === 'returned' ? 'none' : '5 5',
+          opacity: 0.8
+        }).addTo(map);
+        polyline.bindPopup(`
+          <div style="font-family: 'Noto Serif SC', serif;">
+            <b style="color:#b8963c;">${a.name}</b><br>
+            <small>${a.event}</small><br>
+            <span>📍 ${a.originName}</span> → <span style="color:#e57373;">📍 ${a.currentName}</span><br>
+            <span class="text-xs text-gray-400">状态：${a.status === 'returned' ? '已归国' : (a.status === 'disputed' ? '争议中' : '未申索')
+          }</span>
+          </div>
+        `);
+        currentPolylines.push(polyline);
+
+        // 标记
+        const m1 = L.marker(a.origin, { icon: originIcon }).addTo(map)
+          .bindPopup(`<b>${a.originName}</b><br>流失文物：${a.name}`);
+        const m2 = L.marker(a.current, { icon: currentIcon }).addTo(map)
+          .bindPopup(`<b>${a.currentName}</b><br>藏有：${a.name}`);
+        currentMarkers.push(m1, m2);
+      });
+    }
+
+    // 初始渲染
+    render();
+
+    // 搜索事件
+    const searchInput = document.getElementById('search-input');
+    const clearSearchBtn = document.getElementById('clear-search');
+
+    searchInput.addEventListener('input', function (e) {
+      currentSearchTerm = e.target.value;
+      clearSearchBtn.classList.toggle('hidden', currentSearchTerm === '');
+      render();
+    });
+
+    clearSearchBtn.addEventListener('click', function () {
+      searchInput.value = '';
+      currentSearchTerm = '';
+      clearSearchBtn.classList.add('hidden');
+      render();
+      searchInput.focus();
+    });
+
+    // 状态筛选按钮
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('bg-gold', 'text-black'));
+        this.classList.add('bg-gold', 'text-black');
+        currentStatusFilter = this.dataset.filter;
+        // 重置滚动条到顶部
+        document.getElementById('artifact-list').scrollTop = 0;
+        render();
+      });
+    });
+
+    // 默认选中“全部”按钮
+    document.querySelector('.filter-btn[data-filter="all"]').classList.add('bg-gold', 'text-black');
+
+    // 移动端面板切换
+    const toggleBtn = document.getElementById('toggle-panel');
+    const panel = document.getElementById('info-panel');
+    if (toggleBtn && panel) {
+      toggleBtn.addEventListener('click', () => {
+        panel.classList.toggle('hidden');
+      });
+    }
+  </script>
+</body>
+
+</html>

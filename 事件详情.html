@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+  <title>事件详情 · Heritage Homeward</title>
+  <script src="https://cdn.tailwindcss.com">
+  </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Inter:wght@400;600&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', 'Noto Serif SC', serif;
+      background-color: #0b0d0f;
+      color: #e5e3db;
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    html::-webkit-scrollbar,
+    body::-webkit-scrollbar {
+      display: none;
+    }
+
+    html {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .serif {
+      font-family: 'Noto Serif SC', serif;
+    }
+
+    .text-gold {
+      color: #b8963c;
+    }
+
+    .bg-gold {
+      background-color: #b8963c;
+    }
+
+    .border-gold {
+      border-color: #b8963c;
+    }
+
+    .hover-gold:hover {
+      color: #b8963c;
+    }
+
+    .card-dark {
+      background: #111317;
+      border: 1px solid #1e2025;
+      border-radius: 14px;
+      transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .card-dark:hover {
+      border-color: #2a2d33;
+      box-shadow: 0 12px 28px -10px rgba(0, 0, 0, 0.5);
+    }
+
+    .badge-returned {
+      background: #1e3a2fcc;
+      color: #6fcf97;
+      border: 1px solid #2a5a3e;
+    }
+
+    .badge-disputed {
+      background: #3d3a1acc;
+      color: #f2c94c;
+      border: 1px solid #5a5428;
+    }
+
+    .badge-unclaimed {
+      background: #3a1e1ecc;
+      color: #eb5757;
+      border: 1px solid #5a2a2a;
+    }
+
+    .image-placeholder {
+      background: linear-gradient(135deg, #1a1c20, #111317, #1a1a14);
+      border: 1px solid #1e2025;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .image-placeholder i {
+      color: #b8963c;
+      opacity: 0.7;
+      text-shadow: 0 0 30px rgba(184, 150, 60, 0.3);
+      z-index: 2;
+    }
+
+    .image-placeholder .bg-glow {
+      position: absolute;
+      inset: 0;
+      opacity: 0.2;
+      background: radial-gradient(ellipse at 30% 40%, rgba(184, 150, 60, 0.4) 0%, transparent 60%),
+        radial-gradient(ellipse at 70% 70%, rgba(255, 255, 255, 0.04) 0%, transparent 55%);
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(18px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animate-fade-in {
+      animation: fadeUp 0.5s ease forwards;
+    }
+
+    .delay-1 {
+      animation-delay: 0.05s;
+      opacity: 0;
+      animation-fill-mode: forwards;
+    }
+
+    .delay-2 {
+      animation-delay: 0.15s;
+      opacity: 0;
+      animation-fill-mode: forwards;
+    }
+
+    .delay-3 {
+      animation-delay: 0.25s;
+      opacity: 0;
+      animation-fill-mode: forwards;
+    }
+
+    @media (max-width: 640px) {
+      .image-placeholder {
+        height: 200px;
+        border-radius: 12px;
+      }
+    }
+  </style>
+</head>
+
+<body class="flex flex-col min-h-screen">
+
+  <!-- ========== 导航栏 ========== -->
+  <header
+    class="border-b border-gray-800 px-4 md:px-6 py-3 flex justify-between items-center bg-[#0b0d0f] z-30 sticky top-0">
+    <div class="flex items-center space-x-2 md:space-x-3">
+      <a href="index.html" class="text-lg md:text-xl serif text-gold hover:opacity-80 transition">
+        <i class="fas fa-archway mr-1 md:mr-2"></i>归家 · Heritage Homeward
+      </a>
+    </div>
+    <nav class="hidden md:flex space-x-4 md:space-x-6 text-sm text-gray-400">
+      <a href="index.html" class="hover:text-white transition">首页</a>
+      <a href="流失地图.html" class="hover:text-white transition">流失地图</a>
+      <a href="文物库.html" class="hover:text-white transition">文物库</a>
+      <a href="#" class="text-gold font-semibold border-b border-gold pb-1">时间轴</a>
+      <a href="关于.html" class="hover:text-white transition">关于</a>
+    </nav>
+    <button class="md:hidden text-gray-400 hover:text-white text-xl" id="mobile-menu-btn" aria-label="菜单">
+      <i class="fas fa-bars"></i>
+    </button>
+  </header>
+  <div class="md:hidden bg-[#0b0d0f] border-b border-gray-800 px-6 py-3 space-y-2 hidden" id="mobile-menu">
+    <a href="index.html" class="block text-sm text-gray-400 hover:text-white transition py-1">首页</a>
+    <a href="流失地图.html" class="block text-sm text-gray-400 hover:text-white transition py-1">流失地图</a>
+    <a href="文物库.html" class="block text-sm text-gray-400 hover:text-white transition py-1">文物库</a>
+    <a href="#" class="block text-sm text-gold font-semibold py-1">时间轴</a>
+    <a href="关于.html" class="block text-sm text-gray-400 hover:text-white transition py-1">关于</a>
+  </div>
+
+  <!-- ========== 主内容 ========== -->
+  <main class="flex-1 px-4 md:px-8 py-6 max-w-4xl mx-auto w-full" id="main-content">
+    <div id="loading-state" class="text-center py-24">
+      <i class="fas fa-spinner fa-pulse text-4xl text-gold mb-4"></i>
+      <p class="text-gray-500">加载事件档案...</p>
+    </div>
+    <div id="not-found-state" class="hidden text-center py-24">
+      <i class="fas fa-exclamation-triangle text-5xl text-gray-600 mb-4"></i>
+      <p class="text-gray-400 text-lg">未找到该事件</p>
+      <p class="text-gray-600 text-sm mt-1">请检查链接或返回时间轴浏览</p>
+      <a href="时间轴.html"
+        class="inline-block mt-5 px-5 py-2 bg-gold text-black text-sm rounded-full font-semibold hover:opacity-90 transition">
+        <i class="fas fa-arrow-left mr-1.5"></i>返回时间轴
+      </a>
+    </div>
+    <div id="event-content" class="hidden">
+      <!-- 动态渲染 -->
+    </div>
+  </main>
+
+  <footer class="border-t border-gray-800 px-6 py-4 text-center text-xs text-gray-600 mt-auto">
+    <p>☆ 数据持续补充，欢迎贡献文献与坐标。 <a href="#" class="text-gold underline">如何参与开源贡献 →</a></p>
+  </footer>
+
+  <script>
+    // ---------- 数据集（与时间轴完全同步） ----------
+    const artifacts = [
+      {
+        id: 1, name: '圆明园十二生肖铜鸡首', category: '青铜器', eraYear: 1759, status: 'returned', imageIcon: 'fa-dragon',
+        timeline: [
+          { year: '1759', event: '铸造完成，安放于圆明园海晏堂', detail: '由清宫造办处铸造的十二生肖铜像之一，安装于圆明园海晏堂前水力钟喷池。各铜像代表不同时辰，每到相应时辰即从口中喷水，正午时分十二兽首同时喷水，设计精巧，融合中西技术。' },
+          { year: '1860', event: '英法联军焚掠圆明园，铜鸡首流失海外', detail: '第二次鸦片战争期间，英法联军攻入北京，洗劫并焚烧圆明园。铜鸡首与其他兽首一同被掠走，自此开始长达一个多世纪的海外漂泊。' },
+          { year: '2005', event: '现身海外拍卖市场', detail: '铜鸡首出现在国际拍卖行，引发中国文物界高度关注。经过多方努力，避免其再度流失。' },
+          { year: '2019', event: '由民间人士购回并捐赠国家', detail: '在爱国企业家和民间力量的共同努力下，铜鸡首成功购回并无偿捐赠给国家文物局，结束了其海外漂泊的历史。' },
+          { year: '至今', event: '藏于保利艺术博物馆，向公众展出', detail: '现藏于北京保利艺术博物馆，作为圆明园流失文物回归的代表性案例，定期对公众展出，成为爱国主义教育的重要载体。' }
+        ]
+      },
+      {
+        id: 2, name: '圆明园十二生肖铜马首', category: '青铜器', eraYear: 1759, status: 'returned', imageIcon: 'fa-horse-head',
+        timeline: [
+          { year: '1759', event: '铸造完成', detail: '马首塑造了一匹昂首嘶鸣的骏马，鬃毛分缕清晰，肌肉线条饱满，展现了乾隆时期宫廷造办处的高超铸造工艺。' },
+          { year: '1860', event: '被掳至法国，后藏于枫丹白露宫', detail: '圆明园劫掠后，马首被带至法国，曾一度藏于枫丹白露宫，后流入私人收藏。' },
+          { year: '2007', event: '何鸿燊先生以6910万港币购回并捐赠国家', detail: '在2007年香港苏富比拍卖会上，爱国企业家何鸿燊先生以6910万港币竞得马首，随后无偿捐赠给国家，开创了民间力量助力兽首回归的先河。' }
+        ]
+      },
+      {
+        id: 7, name: '顾恺之《女史箴图》唐摹本', category: '书画', eraYear: 700, status: 'unclaimed', imageIcon: 'fa-paint-brush',
+        timeline: [
+          { year: '约4世纪', event: '顾恺之创作原作', detail: '东晋画家顾恺之依据张华《女史箴》一文创作了《女史箴图》原作，画面以连环画形式展现历代贤德妇女故事，线条如“春蚕吐丝”，为早期人物画典范。原作已佚。' },
+          { year: '约7-8世纪', event: '唐代宫廷画家摹写此卷', detail: '唐代宫廷画家忠实临摹了顾恺之原作，此摹本成为后世唯一能够窥见原作风貌的珍贵版本。卷末钤有唐代弘文馆印。' },
+          { year: '18世纪', event: '入藏清宫，乾隆皇帝多次题跋', detail: '此卷进入清宫内府收藏，乾隆皇帝对其极为珍爱，多次在画上题跋并加盖鉴藏印，成为清宫书画珍藏重器。' },
+          { year: '1900年', event: '八国联军侵华期间从清宫流失', detail: '1900年庚子事变，八国联军攻占北京，清宫遭到劫掠，《女史箴图》唐摹本从宫中流出，下落一度不明。' },
+          { year: '1903年', event: '大英博物馆购入收藏至今', detail: '1903年，大英博物馆从约翰逊上尉手中购得此画。由于早期保存条件有限，曾用日式装裱裁切画面，造成一定损伤。目前因纸张脆弱极少公开展出。' }
+        ]
+      },
+      {
+        id: 5, name: '罗塞塔石碑', category: '雕塑石刻', eraYear: -196, status: 'disputed', imageIcon: 'fa-scroll',
+        timeline: [
+          { year: '公元前196年', event: '托勒密五世下令刻制此碑', detail: '古埃及托勒密王朝时期，国王托勒密五世颁布诏书，以三种文字刻于此黑色花岗岩碑上，旨在宣扬其功德与神庙赏赐。碑高114厘米，宽72厘米。' },
+          { year: '1799年', event: '拿破仑远征军发现于埃及拉希德', detail: '法国军队在尼罗河三角洲的罗塞塔镇（今拉希德）修建工事时，偶然发现了这块石碑。由于刻有希腊文，学者们立即意识到其重要价值。' },
+          { year: '1801年', event: '英军缴获并运至英国', detail: '英军击败法军后，根据亚历山大条约将罗塞塔石碑连同其他埃及文物作为战利品运回英国，随后入藏大英博物馆。' },
+          { year: '1822年', event: '商博良破译古埃及象形文字', detail: '法国学者商博良借助石碑上的希腊文对照，成功破译了失传千余年的古埃及象形文字，埃及学由此诞生。' },
+          { year: '2003年', event: '埃及正式提出归还要求', detail: '埃及政府正式向英国提出归还罗塞塔石碑的要求，大英博物馆以“合法获得”及“环球博物馆”理念为由拒绝，至今仍为争议焦点。' }
+        ]
+      },
+      {
+        id: 9, name: '敦煌藏经洞经卷', category: '文献典籍', eraYear: 900, status: 'unclaimed', imageIcon: 'fa-book',
+        timeline: [
+          { year: '约5-11世纪', event: '僧侣将各类文书封存于藏经洞中', detail: '莫高窟第17窟被用作储藏室，历代僧侣将佛经、文书、绢画等约5万件文献封存于此，后洞口被封闭，尘封近千年。' },
+          { year: '1900年', event: '王圆箓道士发现藏经洞', detail: '定居莫高窟的道士王圆箓在清理流沙时偶然发现了藏经洞，这一发现震惊了世界，也引来了西方探险家的觊觎。' },
+          { year: '1907年', event: '斯坦因掠走大量经卷运至英国', detail: '英籍探险家斯坦因以极低价格从王圆箓手中骗购大量经卷和绘画，运回英国后分藏于大英图书馆和大英博物馆。' },
+          { year: '1908年', event: '伯希和掠走精华部分运至法国', detail: '法国汉学家伯希和随后赶来，利用其深厚的汉学功底挑选了最具学术价值的精华部分，运至巴黎国家图书馆。' }
+        ]
+      }
+    ];
+
+    // 补充基础文物（无timeline细节，但用于查找属性）
+    const basicArtifacts = [
+      { id: 3, name: '贝宁青铜器（女王头）', category: '雕塑石刻', eraYear: 1600, status: 'disputed', event: '1897年 英国贝宁远征军掠夺', imageIcon: 'fa-crown' },
+      { id: 4, name: '贝宁青铜器（奥巴像）', category: '雕塑石刻', eraYear: 1750, status: 'disputed', event: '1897年 掠夺', imageIcon: 'fa-landmark' },
+      { id: 6, name: '帕特农神庙雕塑', category: '雕塑石刻', eraYear: -440, status: 'disputed', event: '1801-1812年 埃尔金伯爵移除', imageIcon: 'fa-gopuram' },
+      { id: 8, name: '龙门石窟《帝后礼佛图》', category: '雕塑石刻', eraYear: 520, status: 'unclaimed', event: '1930年代 盗凿走私', imageIcon: 'fa-mountain' },
+      { id: 10, name: '尼日利亚伊费陶俑', category: '雕塑石刻', eraYear: 1300, status: 'disputed', event: '殖民时期掠夺', imageIcon: 'fa-mask' }
+    ];
+
+    const fullArtifacts = [...artifacts];
+    basicArtifacts.forEach(b => {
+      if (!fullArtifacts.find(a => a.id === b.id)) {
+        fullArtifacts.push({
+          ...b,
+          timeline: [{ year: b.event.split(' ')[0] || '不详', event: b.event, detail: '暂无详细事件描述。' }]
+        });
+      }
+    });
+
+    // 工具函数
+    function getStatusLabel(s) {
+      if (s === 'returned') return '已归国';
+      if (s === 'disputed') return '争议中';
+      return '未申索';
+    }
+    function getBadgeClass(s) {
+      if (s === 'returned') return 'badge-returned';
+      if (s === 'disputed') return 'badge-disputed';
+      return 'badge-unclaimed';
+    }
+
+    function getUrlParam(name) {
+      return new URLSearchParams(window.location.search).get(name);
+    }
+
+    // 渲染事件详情
+    function renderEvent(artifact, eventData, eventIndex) {
+      const main = document.getElementById('main-content');
+      const statusLabel = getStatusLabel(artifact.status);
+      const badgeClass = getBadgeClass(artifact.status);
+
+      // 前后事件导航
+      const prevEvent = artifact.timeline[eventIndex - 1] || null;
+      const nextEvent = artifact.timeline[eventIndex + 1] || null;
+
+      main.innerHTML = `
+        <div id="event-detail-root">
+          <!-- 面包屑 -->
+          <div class="flex items-center gap-2 text-xs text-gray-500 mb-5 animate-fade-in flex-wrap">
+            <a href="index.html" class="hover:text-gray-300 transition">首页</a>
+            <i class="fas fa-chevron-right text-[10px]"></i>
+            <a href="时间轴.html" class="hover:text-gray-300 transition">时间轴</a>
+            <i class="fas fa-chevron-right text-[10px]"></i>
+            <a href="文物详情.html?id=${artifact.id}" class="hover:text-gray-300 transition">${artifact.name}</a>
+            <i class="fas fa-chevron-right text-[10px]"></i>
+            <span class="text-gray-300 truncate">${eventData.year} · ${eventData.event}</span>
+          </div>
+
+          <!-- 事件标题与状态 -->
+          <div class="animate-fade-in delay-1 mb-6">
+            <div class="flex flex-wrap items-center gap-2 mb-2">
+              <span class="text-xs font-bold text-gold bg-[#1a1c20] px-3 py-1 rounded-full">${eventData.year}</span>
+              <span class="text-xs px-2 py-0.5 rounded-full ${badgeClass}">${statusLabel}</span>
+              <span class="text-xs bg-gray-800/60 text-gray-300 px-2 py-0.5 rounded-full">${artifact.category}</span>
+            </div>
+            <h1 class="text-2xl md:text-3xl serif font-bold leading-tight">${eventData.event}</h1>
+            <p class="text-sm text-gray-500 mt-2">关联文物：<a href="文物详情.html?id=${artifact.id}" class="text-gold hover:underline">${artifact.name}</a></p>
+          </div>
+
+          <!-- 配图区域 -->
+          <div class="image-placeholder h-48 md:h-64 mb-6 animate-fade-in delay-1">
+            <div class="bg-glow"></div>
+            <i class="fas ${artifact.imageIcon || 'fa-archive'} text-5xl md:text-7xl"></i>
+            <span class="absolute bottom-4 right-5 text-xs text-gray-500 z-10">★ 意象配图（暂无实拍）</span>
+          </div>
+
+          <!-- 详细描述 -->
+          <div class="card-dark p-5 md:p-6 mb-5 animate-fade-in delay-2">
+            <h2 class="text-lg serif font-semibold mb-3 flex items-center gap-2">
+              <i class="fas fa-align-left text-gold"></i>事件详情
+            </h2>
+            <p class="text-sm text-gray-300 leading-relaxed">${eventData.detail || '暂无详细描述。'}</p>
+          </div>
+
+          <!-- 文物快照卡片 -->
+          <div class="card-dark p-5 md:p-6 mb-5 animate-fade-in delay-2">
+            <h3 class="text-base font-bold serif mb-3 flex items-center gap-2">
+              <i class="fas fa-archive text-gold"></i>所属文物档案
+            </h3>
+            <div class="flex flex-col sm:flex-row gap-4">
+              <div class="flex-shrink-0 w-16 h-16 bg-[#1a1c20] rounded-xl flex items-center justify-center">
+                <i class="fas ${artifact.imageIcon || 'fa-landmark'} text-2xl text-gold opacity-70"></i>
+              </div>
+              <div>
+                <h4 class="text-base serif font-semibold">${artifact.name}</h4>
+                <p class="text-xs text-gray-400 mt-1">${artifact.eraYear ? artifact.eraYear + '年' : ''} · ${artifact.category} · ${artifact.material || ''}</p>
+                <div class="flex gap-2 mt-2">
+                  <a href="文物详情.html?id=${artifact.id}" class="text-xs text-gold hover:underline flex items-center gap-1"><i class="fas fa-info-circle"></i>完整档案</a>
+                  <a href="流失地图.html" class="text-xs text-gray-400 hover:text-white flex items-center gap-1"><i class="fas fa-globe-asia"></i>流失地图</a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 前后事件导航 -->
+          <div class="flex justify-between items-center mt-8 animate-fade-in delay-3">
+            <div>
+              ${prevEvent ? `<a href="?event=${artifact.id}_${eventIndex - 1}" class="text-xs text-gray-400 hover:text-white flex items-center gap-1"><i class="fas fa-chevron-left"></i>${prevEvent.year} · ${prevEvent.event}</a>` : '<span class="text-xs text-gray-600">无更早事件</span>'}
+            </div>
+            <div class="text-right">
+              ${nextEvent ? `<a href="?event=${artifact.id}_${eventIndex + 1}" class="text-xs text-gray-400 hover:text-white flex items-center gap-1">${nextEvent.year} · ${nextEvent.event} <i class="fas fa-chevron-right"></i></a>` : '<span class="text-xs text-gray-600">无后续事件</span>'}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // 初始化
+    document.addEventListener('DOMContentLoaded', () => {
+      const loadingEl = document.getElementById('loading-state');
+      const notFoundEl = document.getElementById('not-found-state');
+      const contentEl = document.getElementById('event-content');
+
+      const eventParam = getUrlParam('event'); // 格式: 1_0 (artifactId_index)
+      if (!eventParam) {
+        loadingEl.classList.add('hidden');
+        notFoundEl.classList.remove('hidden');
+        return;
+      }
+      const parts = eventParam.split('_');
+      const artifactId = parseInt(parts[0]);
+      const eventIndex = parseInt(parts[1]);
+
+      if (isNaN(artifactId) || isNaN(eventIndex)) {
+        loadingEl.classList.add('hidden');
+        notFoundEl.classList.remove('hidden');
+        return;
+      }
+
+      const artifact = fullArtifacts.find(a => a.id === artifactId);
+      if (!artifact || !artifact.timeline || eventIndex < 0 || eventIndex >= artifact.timeline.length) {
+        loadingEl.classList.add('hidden');
+        notFoundEl.classList.remove('hidden');
+        return;
+      }
+
+      const eventData = artifact.timeline[eventIndex];
+      loadingEl.classList.add('hidden');
+      contentEl.classList.remove('hidden');
+      document.title = `${eventData.year} · ${eventData.event} · Heritage Homeward`;
+      renderEvent(artifact, eventData, eventIndex);
+    });
+
+    // 移动端菜单
+    const menuBtn = document.getElementById('mobile-menu-btn');
+    const menu = document.getElementById('mobile-menu');
+    if (menuBtn && menu) {
+      menuBtn.addEventListener('click', () => menu.classList.toggle('hidden'));
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>时间轴 · Heritage Homeward</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Inter:wght@400;600&display=swap');
+
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      overflow-y: scroll;
+      scrollbar-gutter: stable;
+    }
+
+    body {
+      font-family: 'Inter', 'Noto Serif SC', serif;
+      background-color: #0b0d0f;
+      color: #e5e3db;
+      margin: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    html::-webkit-scrollbar,
+    body::-webkit-scrollbar {
+      display: none;
+    }
+
+    html {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .serif {
+      font-family: 'Noto Serif SC', serif;
+    }
+
+    .text-gold {
+      color: #b8963c;
+    }
+
+    .bg-gold {
+      background-color: #b8963c;
+    }
+
+    .border-gold {
+      border-color: #b8963c;
+    }
+
+    .hover-gold:hover {
+      color: #b8963c;
+    }
+
+    /* 时间轴主线 */
+    .timeline-line {
+      width: 2px;
+      background: linear-gradient(to bottom, #b8963c, #333);
+    }
+
+    /* 时间节点圆点 */
+    .timeline-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #b8963c;
+      border: 2px solid #0b0d0f;
+      box-shadow: 0 0 8px rgba(184, 150, 60, 0.5);
+      flex-shrink: 0;
+    }
+
+    .timeline-dot.small {
+      width: 10px;
+      height: 10px;
+      box-shadow: 0 0 5px rgba(184, 150, 60, 0.3);
+    }
+
+    /* 事件卡片 */
+    .event-card {
+      background: #111317;
+      border: 1px solid #1e2025;
+      border-radius: 12px;
+      transition: all 0.25s;
+    }
+
+    .event-card:hover {
+      border-color: #b8963c44;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    /* 筛选按钮 */
+    .filter-btn {
+      transition: all 0.25s ease;
+      white-space: nowrap;
+    }
+
+    .filter-btn:hover {
+      border-color: #b8963c;
+      color: #e5e3db;
+    }
+
+    .filter-btn.active-filter {
+      background-color: #b8963c;
+      color: #0b0d0f;
+      border-color: #b8963c;
+      font-weight: 600;
+    }
+
+    /* 年份标记 */
+    .year-badge {
+      background: #1a1c20;
+      border: 1px solid #333;
+      color: #b8963c;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+  </style>
+</head>
+
+<body class="flex flex-col min-h-screen">
+
+  <!-- ========== 导航栏（与所有页面一致） ========== -->
+  <header class="border-b border-gray-800 px-6 py-3 flex justify-between items-center bg-[#0b0d0f] z-30 sticky top-0">
+    <div class="flex items-center space-x-3">
+      <a href="index.html" class="text-xl serif text-gold hover:opacity-80 transition">
+        <i class="fas fa-archway mr-2"></i>归家 · Heritage Homeward
+      </a>
+    </div>
+    <nav class="space-x-4 md:space-x-6 text-sm text-gray-400">
+      <a href="index.html" class="hover:text-white transition">首页</a>
+      <a href="流失地图.html" class="hover:text-white transition">流失地图</a>
+      <a href="文物库.html" class="hover:text-white transition">文物库</a>
+      <a href="#" class="text-gold font-semibold border-b border-gold pb-1">时间轴</a>
+      <a href="关于.html" class="hover:text-white transition">关于</a>
+    </nav>
+    <button class="md:hidden text-gray-400 hover:text-white text-lg" id="mobile-menu-btn" aria-label="菜单">
+      <i class="fas fa-bars"></i>
+    </button>
+  </header>
+  <div class="md:hidden bg-[#0b0d0f] border-b border-gray-800 px-6 py-3 space-y-2 hidden" id="mobile-menu">
+    <a href="index.html" class="block text-sm text-gray-400 hover:text-white transition py-1">首页</a>
+    <a href="流失地图.html" class="block text-sm text-gray-400 hover:text-white transition py-1">流失地图</a>
+    <a href="文物库.html" class="block text-sm text-gray-400 hover:text-white transition py-1">文物库</a>
+    <a href="#" class="block text-sm text-gold font-semibold py-1">时间轴</a>
+    <a href="关于.html" class="block text-sm text-gray-400 hover:text-white transition py-1">关于</a>
+  </div>
+
+  <!-- ========== 主内容 ========== -->
+  <main class="flex-1 px-4 md:px-8 py-6 max-w-5xl mx-auto w-full">
+    <div class="mb-6">
+      <h1 class="text-2xl md:text-3xl serif font-bold mb-1">
+        <i class="fas fa-stream text-gold mr-3"></i>时间轴
+      </h1>
+      <p class="text-sm text-gray-500">从文明劫掠到归途曙光：追溯文物流失与归还的关键节点。</p>
+    </div>
+
+    <!-- 分类筛选 -->
+    <div class="flex flex-wrap gap-2 mb-8" id="category-filters">
+      <button
+        class="filter-btn active-filter px-3 py-1.5 text-xs rounded-full border border-gray-700 text-gray-300 transition"
+        data-category="all">全部事件</button>
+      <button class="filter-btn px-3 py-1.5 text-xs rounded-full border border-gray-700 text-gray-300 transition"
+        data-category="loss">流失事件</button>
+      <button class="filter-btn px-3 py-1.5 text-xs rounded-full border border-gray-700 text-gray-300 transition"
+        data-category="return">归还案例</button>
+      <button class="filter-btn px-3 py-1.5 text-xs rounded-full border border-gray-700 text-gray-300 transition"
+        data-category="treaty">公约与法律</button>
+      <button class="filter-btn px-3 py-1.5 text-xs rounded-full border border-gray-700 text-gray-300 transition"
+        data-category="discovery">发现与考古</button>
+    </div>
+
+    <!-- 时间轴容器 -->
+    <div class="relative">
+      <!-- 居中竖线（桌面端） -->
+      <div
+        class="hidden md:block absolute left-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-[#b8963c] via-[#333] to-[#333] transform -translate-x-1/2">
+      </div>
+      <!-- 移动端左侧竖线 -->
+      <div class="md:hidden absolute left-4 top-0 bottom-0 w-0.5 bg-gradient-to-b from-[#b8963c] via-[#333] to-[#333]">
+      </div>
+
+      <!-- 事件列表 -->
+      <div id="timeline-container" class="space-y-8">
+        <!-- 动态渲染 -->
+      </div>
+
+      <div id="empty-state" class="hidden text-center py-16">
+        <i class="fas fa-history text-5xl text-gray-600 mb-4"></i>
+        <p class="text-gray-500">没有匹配的事件记录</p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="border-t border-gray-800 px-6 py-4 text-center text-xs text-gray-600 mt-auto">
+    <p>☆ 数据持续补充，欢迎贡献历史节点与文献。 <a href="#" class="text-gold underline">如何参与开源贡献 →</a></p>
+  </footer>
+
+  <script>
+    // ---------- 时间轴数据集 ----------
+    // eventLink: 关联文物详情页，格式 ?event=artifactId_eventIndex（无对应详情则留空）
+    const events = [
+      { id: 1, year: 1799, category: 'discovery', title: '罗塞塔石碑发现', description: '拿破仑远征军在埃及拉希德发现罗塞塔石碑，刻有三种文字对照的铭文，成为破译古埃及象形文字的关键。', icon: 'fa-scroll', tags: ['埃及', '考古'], eventLink: '?event=5_1' },
+      { id: 2, year: 1801, category: 'loss', title: '罗塞塔石碑被英国夺走', description: '英军击败法军后，根据亚历山大条约将罗塞塔石碑及其他埃及文物运至英国，后入藏大英博物馆。', icon: 'fa-ship', tags: ['埃及', '掠夺'], eventLink: '?event=5_2' },
+      { id: 3, year: 1801, category: 'loss', title: '埃尔金伯爵开始移除帕特农雕塑', description: '英国驻奥斯曼帝国大使埃尔金伯爵获得苏丹许可（争议），开始从雅典帕特农神庙拆卸大量大理石雕塑，后运往英国。', icon: 'fa-gavel', tags: ['希腊', '掠夺'], eventLink: '' },
+      { id: 4, year: 1860, category: 'loss', title: '圆明园焚掠', description: '第二次鸦片战争中，英法联军攻入北京，洗劫并焚烧圆明园，大量珍宝流失海外，十二生肖兽首自此离散。', icon: 'fa-fire', tags: ['中国', '掠夺'], eventLink: '?event=1_1' },
+      { id: 5, year: 1897, category: 'loss', title: '贝宁远征与掠夺', description: '英国远征军洗劫西非贝宁王国，抢走数千件青铜器和象牙制品，贝宁青铜器流散欧美各国博物馆。', icon: 'fa-ship', tags: ['尼日利亚', '掠夺'], eventLink: '' },
+      { id: 6, year: 1900, category: 'loss', title: '八国联军侵华与清宫劫掠', description: '八国联军占领北京，紫禁城、颐和园、圆明园再次遭劫，《女史箴图》等国宝从此流失。', icon: 'fa-fort-awesome', tags: ['中国', '掠夺'], eventLink: '?event=7_3' },
+      { id: 7, year: 1907, category: 'loss', title: '斯坦因骗取敦煌藏经洞文物', description: '英国探险家斯坦因以低价从王道士手中购得大量敦煌经卷和绘画，运往英国，分藏于大英图书馆和大英博物馆。', icon: 'fa-book', tags: ['中国', '掠夺'], eventLink: '?event=9_2' },
+      { id: 8, year: 1908, category: 'loss', title: '伯希和掠取敦煌精品', description: '法国汉学家伯希和接踵而来，凭借深厚汉学造诣挑选敦煌藏经洞中最精华部分运至巴黎。', icon: 'fa-scroll', tags: ['中国', '掠夺'], eventLink: '?event=9_3' },
+      { id: 9, year: 1912, category: 'loss', title: '娜芙蒂蒂半身像运往德国', description: '德国考古队在埃及阿玛纳发掘出娜芙蒂蒂王后半身像，通过分割出土文物协议将其运至柏林，埃及此后多次要求归还。', icon: 'fa-female', tags: ['埃及', '考古', '争议'], eventLink: '' },
+      { id: 10, year: 1930, category: 'loss', title: '龙门石窟盗凿', description: '上世纪30年代，龙门石窟《帝后礼佛图》等浮雕被凿成小块偷运出境，后入藏美国大都会博物馆等机构。', icon: 'fa-mountain', tags: ['中国', '走私'], eventLink: '' },
+      { id: 11, year: 1970, category: 'treaty', title: 'UNESCO《关于禁止和防止非法进出口文化财产和非法转让其所有权的方法的公约》', description: '联合国教科文组织通过该公约，为各国追索非法流失文物提供了国际法框架，至今已有140多个国家批准。', icon: 'fa-handshake', tags: ['国际公约'], eventLink: '' },
+      { id: 12, year: 1995, category: 'treaty', title: 'UNIDROIT《关于被盗或非法出口文物的公约》', description: '国际统一私法协会通过该公约，进一步细化了对被盗文物和非法出口文物的追索规则。', icon: 'fa-handshake', tags: ['国际公约'], eventLink: '' },
+      { id: 13, year: 2007, category: 'return', title: '圆明园马首回归', description: '澳门商人何鸿燊以6910万港币购得马首并捐赠国家，成为通过民间力量追索流失文物的标志性事件。', icon: 'fa-horse-head', tags: ['中国', '归还'], eventLink: '?event=2_2' },
+      { id: 14, year: 2019, category: 'return', title: '圆明园铜鸡首回归', description: '流失海外百余年的圆明园十二生肖铜鸡首由民间人士购回并捐赠，入藏保利艺术博物馆。', icon: 'fa-dragon', tags: ['中国', '归还'], eventLink: '?event=1_3' },
+      { id: 15, year: 2020, category: 'return', title: '荷兰归还印尼克里塔水牛雕像', description: '荷兰私人藏家将一件殖民时期掠走的印尼克里塔水牛雕像归还给印度尼西亚政府。', icon: 'fa-archway', tags: ['印尼', '归还'], eventLink: '' },
+      { id: 16, year: 2021, category: 'return', title: '德国同意归还贝宁青铜器', description: '德国政府宣布将博物馆收藏的部分贝宁青铜器归还尼日利亚，标志着欧洲对殖民掠夺文物的态度转变。', icon: 'fa-landmark', tags: ['尼日利亚', '归还'], eventLink: '' },
+      { id: 17, year: 2023, category: 'return', title: '德国归还纳米比亚文物', description: '德国将23件殖民时期掠走的文物归还纳米比亚，包括赫雷罗族和纳马族的文物、遗骸等。', icon: 'fa-globe-africa', tags: ['纳米比亚', '归还'], eventLink: '' },
+      { id: 18, year: 2024, category: 'return', title: '多国博物馆持续归还殖民文物', description: '欧美多家博物馆启动大规模归还程序，向非洲和亚洲原属国归还殖民时期掠夺的文物，形成不可逆转的国际潮流。', icon: 'fa-people-carry', tags: ['国际', '归还'], eventLink: '' }
+    ];
+
+    let currentCategory = 'all';
+
+    // 筛选事件并按年代排序
+    function getFilteredEvents() {
+      return events
+        .filter(e => currentCategory === 'all' || e.category === currentCategory)
+        .sort((a, b) => a.year - b.year);
+    }
+
+    // 渲染时间轴
+    function renderTimeline() {
+      const container = document.getElementById('timeline-container');
+      const empty = document.getElementById('empty-state');
+      const filtered = getFilteredEvents();
+
+      container.innerHTML = '';
+      if (filtered.length === 0) {
+        empty.classList.remove('hidden');
+        return;
+      }
+      empty.classList.add('hidden');
+
+      filtered.forEach((e, index) => {
+        const isLeft = index % 2 === 0; // 桌面端交替左右排列
+
+        // 创建事件卡片
+        const card = document.createElement('div');
+        card.className = 'md:flex items-center relative';
+
+        // 判断是否有详情链接
+        const hasLink = e.eventLink && e.eventLink.length > 0;
+        const linkHref = hasLink ? `事件详情.html${e.eventLink}` : 'javascript:void(0)';
+        const cardCursor = hasLink ? 'cursor-pointer' : 'cursor-default';
+        const linkSuffix = hasLink ? `
+          <div class="mt-3 pt-2 border-t border-gray-800/50">
+            <span class="text-xs text-gold hover:text-white transition-colors flex items-center gap-1">
+              <i class="fas fa-arrow-right text-[10px]"></i>查看事件详情
+            </span>
+          </div>
+        ` : '';
+
+        // 移动端：统一左侧布局；桌面端：交替左右
+        if (window.innerWidth < 768) {
+          // 移动端：全部左侧
+          card.innerHTML = `
+            <div class="flex items-start gap-4 ml-1">
+              <div class="flex flex-col items-center">
+                <div class="timeline-dot mt-1.5"></div>
+              </div>
+              <${hasLink ? 'a href="' + linkHref + '"' : 'div'} class="event-card p-4 md:p-5 flex-1 mb-6 ${hasLink ? 'block hover:border-[#b8963c]/50 transition-colors' : ''} ${cardCursor}">
+                <div class="flex justify-between items-start mb-2">
+                  <span class="year-badge">${e.year}年</span>
+                  <i class="fas ${e.icon} text-gold text-lg"></i>
+                </div>
+                <h3 class="text-sm font-bold serif mb-1">${e.title}</h3>
+                <p class="text-xs text-gray-400 leading-relaxed">${e.description}</p>
+                <div class="flex flex-wrap gap-1 mt-2">
+                  ${e.tags.map(tag => `<span class="text-xs text-gray-500 bg-gray-800/50 px-2 py-0.5 rounded-full">#${tag}</span>`).join('')}
+                </div>
+                ${linkSuffix}
+              </${hasLink ? 'a' : 'div'}>
+            </div>
+          `;
+        } else {
+          // 桌面端：交替左右
+          if (isLeft) {
+            card.innerHTML = `
+              <div class="flex items-start w-full">
+                <div class="w-1/2 pr-8 text-right">
+                  <${hasLink ? 'a href="' + linkHref + '"' : 'div'} class="event-card p-5 ${hasLink ? 'inline-block text-left max-w-md block hover:border-[#b8963c]/50 transition-colors' : 'inline-block text-left max-w-md'} ${cardCursor}">
+                    <div class="flex justify-between items-start mb-2">
+                      <span class="year-badge">${e.year}年</span>
+                      <i class="fas ${e.icon} text-gold text-lg"></i>
+                    </div>
+                    <h3 class="text-sm font-bold serif mb-1">${e.title}</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed">${e.description}</p>
+                    <div class="flex flex-wrap gap-1 mt-2">
+                      ${e.tags.map(tag => `<span class="text-xs text-gray-500 bg-gray-800/50 px-2 py-0.5 rounded-full">#${tag}</span>`).join('')}
+                    </div>
+                    ${linkSuffix}
+                  </${hasLink ? 'a' : 'div'}>
+                </div>
+                <div class="absolute left-1/2 transform -translate-x-1/2 flex flex-col items-center">
+                  <div class="timeline-dot"></div>
+                </div>
+                <div class="w-1/2 pl-8"></div>
+              </div>
+            `;
+          } else {
+            card.innerHTML = `
+              <div class="flex items-start w-full">
+                <div class="w-1/2 pr-8"></div>
+                <div class="absolute left-1/2 transform -translate-x-1/2 flex flex-col items-center">
+                  <div class="timeline-dot"></div>
+                </div>
+                <div class="w-1/2 pl-8">
+                  <${hasLink ? 'a href="' + linkHref + '"' : 'div'} class="event-card p-5 max-w-md ${hasLink ? 'block hover:border-[#b8963c]/50 transition-colors' : ''} ${cardCursor}">
+                    <div class="flex justify-between items-start mb-2">
+                      <span class="year-badge">${e.year}年</span>
+                      <i class="fas ${e.icon} text-gold text-lg"></i>
+                    </div>
+                    <h3 class="text-sm font-bold serif mb-1">${e.title}</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed">${e.description}</p>
+                    <div class="flex flex-wrap gap-1 mt-2">
+                      ${e.tags.map(tag => `<span class="text-xs text-gray-500 bg-gray-800/50 px-2 py-0.5 rounded-full">#${tag}</span>`).join('')}
+                    </div>
+                    ${linkSuffix}
+                  </${hasLink ? 'a' : 'div'}>
+                </div>
+              </div>
+            `;
+          }
+        }
+
+        container.appendChild(card);
+      });
+    }
+
+    // 筛选按钮交互
+    document.querySelectorAll('#category-filters .filter-btn').forEach(btn => {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('#category-filters .filter-btn').forEach(b => b.classList.remove('active-filter'));
+        this.classList.add('active-filter');
+        currentCategory = this.dataset.category;
+        renderTimeline();
+      });
+    });
+
+    // 移动端菜单
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    if (mobileMenuBtn && mobileMenu) {
+      mobileMenuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+
+    // 窗口大小变化时重新渲染以调整布局
+    window.addEventListener('resize', renderTimeline);
+
+    // 初始化
+    document.addEventListener('DOMContentLoaded', renderTimeline);
+  </script>
+</body>
+
+</html>

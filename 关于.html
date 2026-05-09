@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>关于 · Heritage Homeward</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Inter:wght@400;600&display=swap');
+    body {
+      font-family: 'Inter', 'Noto Serif SC', serif;
+      background-color: #0b0d0f;
+      color: #e5e3db;
+      margin: 0;
+      min-height: 100vh;
+      overflow-y: scroll;
+    }
+
+    /* 隐藏滚动条但保留滚动功能 */
+    html::-webkit-scrollbar,
+    body::-webkit-scrollbar {
+      display: none;
+    }
+    html {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .serif { font-family: 'Noto Serif SC', serif; }
+    .text-gold { color: #b8963c; }
+    .bg-gold { background-color: #b8963c; }
+    .border-gold { border-color: #b8963c; }
+    .hover-gold:hover { color: #b8963c; }
+    .card-dark {
+      background: #111317;
+      border: 1px solid #1e2025;
+      border-radius: 12px;
+      transition: border-color 0.3s;
+    }
+    .card-dark:hover {
+      border-color: #b8963c44;
+    }
+    .stat-number {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #b8963c;
+      line-height: 1;
+    }
+  </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+  <!-- 导航栏 (与所有页面一致) -->
+  <header class="border-b border-gray-800 px-6 py-3 flex justify-between items-center bg-[#0b0d0f] z-30 sticky top-0">
+    <div class="flex items-center space-x-3">
+      <a href="index.html" class="text-xl serif text-gold hover:opacity-80 transition">
+        <i class="fas fa-archway mr-2"></i>归家 · Heritage Homeward
+      </a>
+    </div>
+    <nav class="space-x-4 md:space-x-6 text-sm text-gray-400">
+      <a href="index.html" class="hover:text-white transition">首页</a>
+      <a href="流失地图.html" class="hover:text-white transition">流失地图</a>
+      <a href="文物库.html" class="hover:text-white transition">文物库</a>
+      <a href="时间轴.html" class="hover:text-white transition">时间轴</a>
+      <a href="#" class="text-gold font-semibold border-b border-gold pb-1">关于</a>
+    </nav>
+  </header>
+
+  <!-- 主内容 -->
+  <main class="flex-1 max-w-5xl mx-auto w-full px-4 sm:px-6 py-8">
+    <!-- 页面标题 -->
+    <div class="text-center mb-10">
+      <h1 class="text-3xl md:text-4xl serif font-bold"><i class="fas fa-info-circle text-gold mr-3"></i>关于归家计划</h1>
+      <p class="text-gray-500 mt-3 max-w-2xl mx-auto">了解这个开源项目的使命、数据与愿景。</p>
+    </div>
+
+    <!-- 使命声明 -->
+    <div class="card-dark p-6 md:p-8 mb-6">
+      <h2 class="text-xl serif font-bold mb-4 flex items-center gap-2"><i class="fas fa-bullseye text-gold"></i>我们的使命</h2>
+      <p class="text-sm text-gray-300 leading-relaxed mb-3">
+        “归家”是一个非营利的开放数据项目，致力于记录<b>任何国家或地区</b>因战争、殖民、盗掘、非法交易等不正当途径流失的国宝级文物。我们以严谨、中立的学术态度梳理每一件文物的漂泊脉络，展示其原属地、现藏地、流失事件与归还进展。
+      </p>
+      <p class="text-sm text-gray-300 leading-relaxed">
+        我们相信，<strong class="text-gold">知晓来处，才有归途</strong>。通过构建世界流失文物档案，我们希望唤醒公众对文化主权与历史公正的关注，并为研究者、文博机构和追索行动提供开放可靠的数据基础。
+      </p>
+    </div>
+
+    <!-- 核心特点 -->
+    <div class="grid md:grid-cols-3 gap-4 mb-6">
+      <div class="card-dark p-5 text-center">
+        <i class="fas fa-database text-3xl text-gold mb-3"></i>
+        <h3 class="font-bold serif mb-2">开放数据</h3>
+        <p class="text-xs text-gray-400">所有文物条目以结构化数据存储，遵循开放标准，可自由下载、引用与二次开发。</p>
+      </div>
+      <div class="card-dark p-5 text-center">
+        <i class="fas fa-globe-americas text-3xl text-gold mb-3"></i>
+        <h3 class="font-bold serif mb-2">全球覆盖</h3>
+        <p class="text-xs text-gray-400">文物来自亚洲、非洲、欧洲、美洲、大洋洲，涵盖青铜、书画、雕塑、文献等多种类型。</p>
+      </div>
+      <div class="card-dark p-5 text-center">
+        <i class="fas fa-users text-3xl text-gold mb-3"></i>
+        <h3 class="font-bold serif mb-2">社区共建</h3>
+        <p class="text-xs text-gray-400">项目完全开源，任何人均可通过GitHub贡献文物条目、修正信息或提供文献来源。</p>
+      </div>
+    </div>
+
+    <!-- 数据统计卡片 -->
+    <div class="card-dark p-6 mb-6">
+      <h2 class="text-xl serif font-bold mb-6 flex items-center gap-2"><i class="fas fa-chart-bar text-gold"></i>项目数据</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+        <div>
+          <div class="stat-number">15+</div>
+          <div class="text-xs text-gray-500 mt-1">已收录流失文物</div>
+        </div>
+        <div>
+          <div class="stat-number">10+</div>
+          <div class="text-xs text-gray-500 mt-1">原属国家</div>
+        </div>
+        <div>
+          <div class="stat-number">5</div>
+          <div class="text-xs text-gray-500 mt-1">已归还案例</div>
+        </div>
+        <div>
+          <div class="stat-number">∞</div>
+          <div class="text-xs text-gray-500 mt-1">持续更新中</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 如何参与 -->
+    <div class="card-dark p-6 md:p-8 mb-6">
+      <h2 class="text-xl serif font-bold mb-4 flex items-center gap-2"><i class="fas fa-code-branch text-gold"></i>参与贡献</h2>
+      <p class="text-sm text-gray-300 mb-3">
+        归家计划是一个社区驱动的开源项目，代码和数据均托管在GitHub上。你可以通过以下方式参与：
+      </p>
+      <ul class="space-y-2 text-sm text-gray-400 list-disc list-inside ml-2">
+        <li>提交新文物条目（需提供权威来源）</li>
+        <li>完善现有文物的描述、背景或时间轴</li>
+        <li>修正地理坐标、年代等数据</li>
+        <li>改进网站前端代码或设计</li>
+        <li>报告问题或建议新功能</li>
+      </ul>
+      <div class="mt-4">
+        <a href="#" class="inline-flex items-center gap-2 px-5 py-2 bg-gold text-black text-sm font-semibold rounded-full hover:opacity-90 transition">
+          <i class="fab fa-github"></i> 访问 GitHub 仓库
+        </a>
+      </div>
+    </div>
+
+    <!-- 法律声明 -->
+    <div class="card-dark p-6">
+      <h2 class="text-xl serif font-bold mb-4 flex items-center gap-2"><i class="fas fa-balance-scale text-gold"></i>法律与伦理声明</h2>
+      <p class="text-xs text-gray-500 leading-relaxed mb-2">
+        本网站为社区驱动的非营利知识库，不代表任何政府、文博机构或政治团体立场。所有文物数据均来源于公开的学术文献、博物馆档案、新闻报道及国际组织数据库，仅供教育、研究和公益用途。
+      </p>
+      <p class="text-xs text-gray-500 leading-relaxed mb-2">
+        我们对文物流失历史的描述基于可查证的事实，力求客观中立，不煽动民族或国家对立情绪。项目的最终目标是促进文化遗产的保护、研究与合法归还，支持联合国教科文组织及国际统一私法协会相关公约的宗旨。
+      </p>
+      <p class="text-xs text-gray-500 leading-relaxed">
+        内容以 <a href="#" class="text-gold underline">CC BY-SA 4.0</a> 许可发布。如需使用本站数据，请遵守相应许可条款。
+      </p>
+    </div>
+  </main>
+
+  <!-- 页脚 -->
+  <footer class="border-t border-gray-800 px-6 py-4 text-center text-xs text-gray-600 mt-auto">
+    <p>☆ 数据持续补充，欢迎贡献文献与坐标。 <a href="#" class="text-gold underline">如何参与开源贡献 →</a></p>
+  </footer>
+</body>
+</html>

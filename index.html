@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>归家 · Heritage Homeward — 记录世界流失文物</title>
+  <!-- Leaflet & Tailwind CDN -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Inter:wght@400;600&display=swap');
+
+    body {
+      font-family: 'Inter', 'Noto Serif SC', serif;
+      background-color: #0b0d0f;
+      color: #e5e3db;
+      margin: 0;
+      overflow-y: scroll;
+    }
+
+    /* 隐藏滚动条但保留滚动功能 */
+    html::-webkit-scrollbar,
+    body::-webkit-scrollbar {
+      display: none;
+    }
+
+    html {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .serif {
+      font-family: 'Noto Serif SC', serif;
+    }
+
+    /* 导航栏 */
+    .navbar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      padding: 1.5rem 3rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 20;
+      background: transparent;
+      color: #f0e5d2;
+    }
+
+    .navbar .logo {
+      font-size: 1.8rem;
+      font-weight: bold;
+      letter-spacing: 3px;
+      color: #d4af37;
+      font-family: 'Noto Serif SC', serif;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .navbar .logo i {
+      font-size: 2rem;
+      color: #d4af37;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2.2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: #e0d3bb;
+      text-decoration: none;
+      font-weight: 400;
+      letter-spacing: 1px;
+      font-size: 0.95rem;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: #d4af37;
+    }
+
+    .text-gold {
+      color: #D4A23B;
+    }
+
+    .bg-gold {
+      background-color: #D4A23B;
+    }
+
+    .gold-line {
+      border-left: 2px solid #b8963c;
+    }
+
+    .hero-section {
+      background: radial-gradient(ellipse at 20% 50%, #3b2e1e 0%, #1e1810 70%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-section h1 {
+      font-size: clamp(2.8rem, 7vw, 5.5rem);
+      font-weight: 600;
+      color: #f7e7c8;
+      letter-spacing: 4px;
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+      margin-bottom: 1.5rem;
+      line-height: 1.2;
+      font-family: 'Noto Serif SC', serif;
+    }
+
+    .hero-section h1 .accent {
+      color: #d4af37;
+      font-style: italic;
+    }
+
+    .hero-section .subtitle {
+      font-size: 1.3rem;
+      color: #cfc0a9;
+      margin-bottom: 2.5rem;
+      font-weight: 300;
+      letter-spacing: 1px;
+      max-width: 650px;
+      margin-left: auto;
+      margin-right: auto;
+      margin-top: 0;
+    }
+
+    .particle {
+      position: absolute;
+      background: rgba(212, 162, 59, 0.55);
+      border-radius: 50%;
+      box-shadow: 0 0 12px rgba(212, 162, 59, 0.5);
+      animation: float 6s infinite alternate ease-in-out;
+      pointer-events: none;
+    }
+
+    @keyframes float {
+      0% {
+        transform: translateY(0px) scale(1);
+        opacity: 0.2;
+      }
+
+      100% {
+        transform: translateY(-35px) scale(1.3);
+        opacity: 0.7;
+      }
+    }
+
+    #map {
+      height: 400px;
+      background: #1a1c1e;
+    }
+
+    .card-dark {
+      background: #111317;
+      border: 1px solid #2a2a2a;
+      transition: all 0.3s;
+    }
+
+    .card-dark:hover {
+      box-shadow: 0 0 25px rgba(184, 150, 60, 0.25);
+      border-color: #b8963c;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen flex flex-col">
+
+  <!-- 导航栏 -->
+  <header class="absolute top-0 left-0 w-full z-20 px-6 py-5 flex justify-between items-center bg-transparent">
+    <div class="flex items-center space-x-2">
+      <i class="fas fa-archway text-gold text-2xl"></i>
+      <span class="text-xl font-semibold tracking-wide text-gold">归家 · Heritage Homeward</span>
+    </div>
+    <nav class="hidden md:block" style="display: flex; gap: 2.2rem;">
+      <a href="流失地图.html"
+        style="color: #e0d3bb; text-decoration: none; font-weight: 400; letter-spacing: 1px; font-size: 0.95rem; transition: color 0.2s;"
+        onmouseover="this.style.color='#d4af37'" onmouseout="this.style.color='#e0d3bb'">流失地图</a>
+      <a href="文物库.html"
+        style="color: #e0d3bb; text-decoration: none; font-weight: 400; letter-spacing: 1px; font-size: 0.95rem; transition: color 0.2s;"
+        onmouseover="this.style.color='#d4af37'" onmouseout="this.style.color='#e0d3bb'">文物库</a>
+      <a href="时间轴.html"
+        style="color: #e0d3bb; text-decoration: none; font-weight: 400; letter-spacing: 1px; font-size: 0.95rem; transition: color 0.2s;"
+        onmouseover="this.style.color='#d4af37'" onmouseout="this.style.color='#e0d3bb'">时间轴</a>
+      <a href="关于.html"
+        style="color: #e0d3bb; text-decoration: none; font-weight: 400; letter-spacing: 1px; font-size: 0.95rem; transition: color 0.2s;"
+        onmouseover="this.style.color='#d4af37'" onmouseout="this.style.color='#e0d3bb'">关于</a>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero-section min-h-screen flex items-center justify-center text-center px-6 py-24 relative">
+    <div class="absolute inset-0 pointer-events-none" id="hero-particles"></div>
+    <div class="relative z-10 max-w-3xl">
+      <h1 class="serif">
+        它们曾被夺走<br><span class="accent">我们正铺就归途</span>
+      </h1>
+      <p class="subtitle">
+        以开放数据铭记文明伤痕，用事实连接过去与未来。
+      </p>
+      <div class="flex flex-wrap justify-center gap-4">
+        <a href="流失地图.html"
+          class="bg-gold text-black font-semibold px-8 py-3 rounded-full shadow-lg hover:bg-yellow-600 transition"><i
+            class="fas fa-map-marked-alt mr-2"></i>探索流失地图</a>
+        <a href="了解使命.html" target="_blank" rel="noopener noreferrer"
+          class="border border-stone-500 text-stone-300 px-8 py-3 rounded-full hover:bg-white/10 transition"><i
+            class="fas fa-scroll mr-2"></i>了解使命</a>
+      </div>
+      <div class="mt-16 text-stone-500 text-sm animate-bounce">
+        <i class="fas fa-chevron-down"></i> 向下追溯
+      </div>
+    </div>
+    <!-- 底部淡出遮罩 -->
+    <div
+      class="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-b from-transparent to-[#0b0d0f] pointer-events-none">
+    </div>
+  </section>
+
+  <!-- 统计条（底部间距已加大至 mb-32） -->
+  <div class="relative z-10 max-w-5xl mx-auto -mt-20 mb-36 px-4">
+    <div
+      class="backdrop-blur-md bg-black/40 border border-stone-700 rounded-xl grid grid-cols-2 md:grid-cols-4 gap-4 p-6 text-center shadow-2xl">
+      <div class="p-3">
+        <div class="text-3xl font-bold text-gold" id="count-artifacts">0</div>
+        <div class="text-xs text-stone-400 uppercase mt-1">已收录文物</div>
+      </div>
+      <div class="p-3">
+        <div class="text-3xl font-bold text-gold" id="count-events">0</div>
+        <div class="text-xs text-stone-400 uppercase mt-1">流转事件</div>
+      </div>
+      <div class="p-3">
+        <div class="text-3xl font-bold text-gold" id="count-agents">0</div>
+        <div class="text-xs text-stone-400 uppercase mt-1">关联机构</div>
+      </div>
+      <div class="p-3">
+        <div class="text-3xl font-bold text-gold">47</div>
+        <div class="text-xs text-stone-400 uppercase mt-1">原属国家</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 流失轨迹地图（冷色调原版） -->
+  <section class="px-6 max-w-6xl mx-auto w-full mb-20">
+    <div class="flex items-baseline justify-between mb-4">
+      <h2 class="text-2xl serif font-bold">流失轨迹 <span class="text-gray-500 text-lg">· 全球流向预览</span></h2>
+      <a href="流失地图.html" class="text-sm text-gray-400 hover:text-white">探索完整地图 →</a>
+    </div>
+    <div id="map" class="rounded-lg border border-gray-800 overflow-hidden"></div>
+    <p class="text-xs text-gray-600 mt-2">* 标记仅为代表性流向示意，非完整列表。数据持续更新中。</p>
+  </section>
+
+  <!-- 文物卡片（冷色调原版） -->
+  <section class="px-6 max-w-6xl mx-auto mb-20">
+    <h2 class="text-2xl serif font-bold mb-8">见证 · 归途</h2>
+    <div class="grid md:grid-cols-3 gap-6">
+      <a href="文物详情.html" class="block">
+        <div class="card-dark bg-gray-900 border border-gray-800 rounded-xl p-5">
+          <div class="h-40 bg-gray-800 rounded-lg mb-4 flex items-center justify-center text-gray-600">[ 文物影像 ]</div>
+          <span class="text-xs text-green-400 bg-green-900/20 px-2 py-1 rounded-full">已归国</span>
+          <h3 class="text-xl font-bold mt-3 serif">圆明园十二生肖铜鸡首</h3>
+          <p class="text-gray-400 text-sm mt-2">1860年英法联军掠于海晏堂，后由民间购回捐赠国家。</p>
+          <div class="flex justify-between mt-4 text-xs text-gray-500"><span>原属：中国</span><span>现藏：保利艺术博物馆</span></div>
+        </div>
+      </a>
+      <a href="文物详情.html" class="block">
+        <div class="card-dark bg-gray-900 border border-gray-800 rounded-xl p-5">
+          <div class="h-40 bg-gray-800 rounded-lg mb-4 flex items-center justify-center text-gray-600">[ 文物影像 ]</div>
+          <span class="text-xs text-yellow-400 bg-yellow-900/20 px-2 py-1 rounded-full">争议中</span>
+          <h3 class="text-xl font-bold mt-3 serif">贝宁青铜器（女王头）</h3>
+          <p class="text-gray-400 text-sm mt-2">1897年英国远征军掠夺，分藏于大英博物馆等多国机构。</p>
+          <div class="flex justify-between mt-4 text-xs text-gray-500"><span>原属：尼日利亚</span><span>部分已归还谈判中</span></div>
+        </div>
+      </a>
+      <a href="文物详情.html" class="block">
+        <div class="card-dark bg-gray-900 border border-gray-800 rounded-xl p-5">
+          <div class="h-40 bg-gray-800 rounded-lg mb-4 flex items-center justify-center text-gray-600">[ 文物影像 ]</div>
+          <span class="text-xs text-red-400 bg-red-900/20 px-2 py-1 rounded-full">未申索</span>
+          <h3 class="text-xl font-bold mt-3 serif">顾恺之《女史箴图》唐摹本</h3>
+          <p class="text-gray-400 text-sm mt-2">1900年八国联军期间从清宫流失，现为大英博物馆镇馆之宝。</p>
+          <div class="flex justify-between mt-4 text-xs text-gray-500"><span>原属：中国</span><span>现藏：大英博物馆</span></div>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- 时间轴（冷色调原版） -->
+  <section class="px-6 max-w-6xl mx-auto mb-20">
+    <h2 class="text-2xl serif font-bold mb-8">掠夺与流失 · 关键节点</h2>
+    <div class="flex overflow-x-auto space-x-6 pb-4">
+      <div class="flex-shrink-0 w-40">
+        <div class="gold-line pl-3"><span class="text-xs text-gray-500">1840</span>
+          <p class="text-sm mt-1">鸦片战争爆发</p>
+        </div>
+      </div>
+      <div class="flex-shrink-0 w-40">
+        <div class="gold-line pl-3"><span class="text-xs text-gray-500">1860</span>
+          <p class="text-sm mt-1">圆明园焚掠</p>
+        </div>
+      </div>
+      <div class="flex-shrink-0 w-40">
+        <div class="gold-line pl-3"><span class="text-xs text-gray-500">1897</span>
+          <p class="text-sm mt-1">贝宁远征</p>
+        </div>
+      </div>
+      <div class="flex-shrink-0 w-40">
+        <div class="gold-line pl-3"><span class="text-xs text-gray-500">1900</span>
+          <p class="text-sm mt-1">八国联军侵华</p>
+        </div>
+      </div>
+      <div class="flex-shrink-0 w-40">
+        <div class="gold-line pl-3"><span class="text-xs text-gray-500">1970</span>
+          <p class="text-sm mt-1">UNESCO公约</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 回家案例（冷色调原版） -->
+  <section class="px-6 max-w-6xl mx-auto mb-20">
+    <h2 class="text-2xl serif font-bold mb-8">已踏上归途</h2>
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="bg-gray-900/80 border border-gray-800 p-4 rounded-lg"><span class="text-green-400 text-sm font-bold">✓
+          2020年归还</span>
+        <p class="mt-1">荷兰私人藏家归还印尼 <span class="text-gray-400">—— 克里塔水牛雕像</span></p>
+      </div>
+      <div class="bg-gray-900/80 border border-gray-800 p-4 rounded-lg"><span class="text-green-400 text-sm font-bold">✓
+          2023年归还</span>
+        <p class="mt-1">德国归还纳米比亚 <span class="text-gray-400">—— 赫雷罗族文物23件</span></p>
+      </div>
+      <div class="bg-gray-900/80 border border-gray-800 p-4 rounded-lg"><span class="text-green-400 text-sm font-bold">✓
+          持续追索</span>
+        <p class="mt-1">希腊持续要求归还 <span class="text-gray-400">—— 帕特农神庙雕塑</span></p>
+      </div>
+      <div class="bg-gray-900/80 border border-gray-800 p-4 rounded-lg"><span class="text-green-400 text-sm font-bold">✓
+          已有归还先例</span>
+        <p class="mt-1">中国追索部分圆明园兽首 <span class="text-gray-400">—— 牛、虎、猴、猪、马、鸡</span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 行动号召（全新布局：参与方式卡片 + 双按钮） -->
+  <section class="border-t border-gray-800 py-16 px-6">
+    <div class="max-w-4xl mx-auto text-center">
+      <h2 class="text-3xl serif font-bold mb-4">你也是这条归家路上的一盏灯。</h2>
+      <p class="text-gray-400 max-w-2xl mx-auto mb-10">
+        无论你是文博学者、历史爱好者，还是关心文化血脉的普通人，都可以通过以下方式加入我们。项目完全开源，基于事实，尊重多元记忆。
+      </p>
+
+      <!-- 参与方式卡片网格 -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <div class="p-6 bg-gray-900/70 border border-gray-800 rounded-xl hover:border-gray-700 transition-colors">
+          <i class="fas fa-file-alt text-gold text-2xl mb-3"></i>
+          <h3 class="font-semibold text-white mb-2">贡献文献</h3>
+          <p class="text-gray-400 text-sm">提供学术论文、档案记录等来源，帮助完善文物条目的引用链。</p>
+        </div>
+        <div class="p-6 bg-gray-900/70 border border-gray-800 rounded-xl hover:border-gray-700 transition-colors">
+          <i class="fas fa-plus-circle text-gold text-2xl mb-3"></i>
+          <h3 class="font-semibold text-white mb-2">提交文物条目</h3>
+          <p class="text-gray-400 text-sm">发现尚未收录的流失文物？提交详细信息，经社区审阅后加入公开数据库。</p>
+        </div>
+        <div class="p-6 bg-gray-900/70 border border-gray-800 rounded-xl hover:border-gray-700 transition-colors">
+          <i class="fas fa-clipboard-check text-gold text-2xl mb-3"></i>
+          <h3 class="font-semibold text-white mb-2">审阅信息</h3>
+          <p class="text-gray-400 text-sm">协助核实数据准确性，标注存疑条目，确保知识库的严谨与可信。</p>
+        </div>
+      </div>
+
+      <!-- 行动按钮组 -->
+      <div class="flex flex-wrap justify-center gap-4">
+        <a href="了解使命.html" target="_blank" rel="noopener noreferrer"
+          class="bg-gold text-black font-semibold px-8 py-3 rounded-full shadow-lg hover:bg-yellow-600 transition inline-flex items-center">
+          <i class="fas fa-hands-helping mr-2"></i>查看贡献指南
+        </a>
+        <a href="文物数据库.html" target="_blank" rel="noopener noreferrer"
+          class="border border-gray-600 text-gray-300 px-8 py-3 rounded-full hover:bg-gray-800 transition inline-flex items-center">
+          <i class="fas fa-database mr-2"></i>浏览文物数据库
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 页脚（冷色调原版） -->
+  <footer class="border-t border-gray-800 px-6 py-8 text-xs text-gray-600">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between gap-4">
+      <p>本网站为社区驱动的非营利知识库，不代表任何政府或文博机构立场。</p>
+      <p>内容以 CC BY-SA 4.0 许可发布 · <a href="#" class="underline">法律声明</a> · <a href="#" class="underline">联络我们</a></p>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    // 粒子效果
+    (function () {
+      const c = document.getElementById('hero-particles');
+      for (let i = 0; i < 45; i++) {
+        const p = document.createElement('div');
+        p.classList.add('particle');
+        const s = Math.random() * 6 + 2;
+        p.style.width = s + 'px';
+        p.style.height = s + 'px';
+        p.style.left = Math.random() * 100 + '%';
+        p.style.top = Math.random() * 100 + '%';
+        p.style.animationDelay = Math.random() * 5 + 's';
+        c.appendChild(p);
+      }
+    })();
+
+    // 数字递增
+    function animateValue(id, start, end, duration) {
+      const el = document.getElementById(id);
+      let st;
+      const step = (ts) => {
+        if (!st) st = ts;
+        const p = Math.min((ts - st) / duration, 1);
+        el.textContent = Math.floor(p * (end - start) + start);
+        if (p < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    }
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        animateValue('count-artifacts', 0, 1286, 2000);
+        animateValue('count-events', 0, 3402, 2000);
+        animateValue('count-agents', 0, 879, 2000);
+      }, 300);
+    });
+
+    // 地图
+    document.addEventListener('DOMContentLoaded', () => {
+      const map = L.map('map', { center: [20, 10], zoom: 2, scrollWheelZoom: false, zoomControl: false });
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>'
+      }).addTo(map);
+      const oi = L.divIcon({ html: '<div style="background:#b8963c; width:10px; height:10px; border-radius:50%;"></div>', iconSize: [10, 10] });
+      const ci = L.divIcon({ html: '<div style="background:#e57373; width:8px; height:8px; border-radius:50%;"></div>', iconSize: [8, 8] });
+      L.marker([39.9042, 116.4074], { icon: oi }).addTo(map).bindPopup('原属地：圆明园');
+      L.marker([51.5194, -0.127], { icon: ci }).addTo(map).bindPopup('现藏地：大英博物馆');
+      L.polyline([[39.9042, 116.4074], [51.5194, -0.127]], { color: '#b8963c', weight: 1.5, dashArray: '4 4' }).addTo(map);
+      L.marker([6.317, 5.614], { icon: oi }).addTo(map).bindPopup('原属地：贝宁王国');
+      L.marker([52.517, 13.388], { icon: ci }).addTo(map).bindPopup('现藏地：柏林民族学博物馆');
+      L.polyline([[6.317, 5.614], [52.517, 13.388]], { color: '#b8963c', weight: 1.5, dashArray: '4 4' }).addTo(map);
+    });
+  </script>
+</body>
+
+</html>
